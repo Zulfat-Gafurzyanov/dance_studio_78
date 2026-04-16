@@ -2,7 +2,7 @@ import asyncpg
 
 
 class BaseRepository:
-    """Base repository wrapping an asyncpg connection with common query helpers."""
+    """Базовый репозиторий — обёртка над asyncpg-соединением с общими методами запросов."""
 
     def __init__(self, conn: asyncpg.Connection):
         self.conn = conn

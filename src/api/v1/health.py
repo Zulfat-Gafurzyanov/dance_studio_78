@@ -15,14 +15,14 @@ async def health(
     conn: Annotated[asyncpg.Connection, Depends(get_db)],
     redis_client: Annotated[redis.Redis, Depends(get_redis)],
 ) -> HealthResponse:
-    # Check database
+    # Проверяем базу данных
     try:
         await conn.fetchval("SELECT 1")
         db = ComponentHealth(status="ok")
     except Exception as e:
         db = ComponentHealth(status="error", detail=str(e))
 
-    # Check Redis
+    # Проверяем Redis
     try:
         await redis_client.ping()
         rd = ComponentHealth(status="ok")

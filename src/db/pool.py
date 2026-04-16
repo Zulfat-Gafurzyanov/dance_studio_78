@@ -10,7 +10,7 @@ db_pool: asyncpg.Pool | None = None
 
 
 async def init_db_pool() -> asyncpg.Pool:
-    """Create and return the asyncpg connection pool."""
+    """Создаёт и возвращает пул соединений asyncpg."""
     global db_pool
     try:
         db_pool = await asyncpg.create_pool(
@@ -23,7 +23,7 @@ async def init_db_pool() -> asyncpg.Pool:
         logger.critical("Failed to create database pool: %s", e)
         raise
 
-    # Set search_path if non-default schema
+    # Устанавливаем search_path если схема не public
     if settings.DB_SCHEMA != "public":
         async with db_pool.acquire() as conn:
             await conn.execute(f"SET search_path TO {settings.DB_SCHEMA}")
@@ -33,7 +33,7 @@ async def init_db_pool() -> asyncpg.Pool:
 
 
 async def close_db_pool() -> None:
-    """Close the asyncpg connection pool."""
+    """Закрывает пул соединений asyncpg."""
     global db_pool
     if db_pool:
         await db_pool.close()

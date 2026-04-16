@@ -1,4 +1,4 @@
-"""SQLAlchemy Base — used ONLY for Alembic migration generation, NOT for queries."""
+"""SQLAlchemy Base — используется ТОЛЬКО для генерации миграций Alembic, не для запросов."""
 
 import datetime as dt
 

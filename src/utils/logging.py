@@ -24,7 +24,7 @@ class ColoredFormatter(logging.Formatter):
 
 
 def setup_logging() -> None:
-    """Configure async queue-based logging with colored console output."""
+    """Настраивает асинхронное логирование через очередь с цветным выводом в консоль."""
     log_queue: queue.Queue = queue.Queue()
     queue_handler = logging.handlers.QueueHandler(log_queue)
 
@@ -38,6 +38,6 @@ def setup_logging() -> None:
     root.setLevel(getattr(logging, settings.LOGGING_LEVEL, logging.INFO))
     root.addHandler(queue_handler)
 
-    # Suppress noisy third-party loggers
+    # Приглушаем шумные логгеры сторонних библиотек
     for name in ("uvicorn.access", "asyncpg"):
         logging.getLogger(name).setLevel(logging.WARNING)

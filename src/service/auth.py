@@ -29,36 +29,40 @@ class AuthService:
         try:
             user = await self.repository.create(request.email, hashed)
         except UniqueViolationError as e:
-            raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered") from e
+            raise HTTPException(status.HTTP_409_CONFLICT, "Email уже зарегистрирован") from e
 
-        access = create_access_token(user["id"])
-        refresh = create_refresh_token(user["id"])
-        await store_refresh_token(user["id"], refresh, self.redis)
+        access = create_access_token(user["id"], user["role"])
+        refresh, jti = create_refresh_token(user["id"])
+        await store_refresh_token(user["id"], jti, self.redis)
 
         return TokenPair(access_token=access, refresh_token=refresh)
 
     async def sign_in(self, request: SignInRequest) -> TokenPair:
         user = await self.repository.get_by_email(request.email)
         if not user:
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Неверный email или пароль")
 
         if not verify_password(request.password, user["password_hash"]):
-            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid credentials")
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Неверный email или пароль")
 
         if not user["is_active"]:
-            raise HTTPException(status.HTTP_403_FORBIDDEN, "Account is deactivated")
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Аккаунт заблокирован")
 
-        access = create_access_token(user["id"])
-        refresh = create_refresh_token(user["id"])
-        await store_refresh_token(user["id"], refresh, self.redis)
+        access = create_access_token(user["id"], user["role"])
+        refresh, jti = create_refresh_token(user["id"])
+        await store_refresh_token(user["id"], jti, self.redis)
 
         return TokenPair(access_token=access, refresh_token=refresh)
 
     async def refresh(self, refresh_token: str) -> TokenPair:
         user_id = await decode_refresh_token(refresh_token, self.redis)
 
-        access = create_access_token(user_id)
-        refresh = create_refresh_token(user_id)
-        await store_refresh_token(user_id, refresh, self.redis)
+        user = await self.repository.get_by_id(user_id)
+        if not user:
+            raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Пользователь не найден")
 
-        return TokenPair(access_token=access, refresh_token=refresh)
+        access = create_access_token(user_id, user["role"])
+        new_refresh, jti = create_refresh_token(user_id)
+        await store_refresh_token(user_id, jti, self.redis)
+
+        return TokenPair(access_token=access, refresh_token=new_refresh)
