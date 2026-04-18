@@ -10,9 +10,11 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from src.core.security import decode_access_token
 from src.db import pool as db_pool_module
+from src.repository.style import StyleRepository
 from src.repository.user import UserRepository
 from src.service.admin import AdminService
 from src.service.auth import AuthService
+from src.service.style import StyleService
 from src.service.user import UserService
 
 security_scheme = HTTPBearer()
@@ -89,3 +91,15 @@ async def get_admin_service(
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> AdminService:
     return AdminService(user_service)
+
+
+async def get_style_repository(
+    conn: Annotated[asyncpg.Connection, Depends(get_db)],
+) -> StyleRepository:
+    return StyleRepository(conn)
+
+
+async def get_style_service(
+    repo: Annotated[StyleRepository, Depends(get_style_repository)],
+) -> StyleService:
+    return StyleService(repo)
