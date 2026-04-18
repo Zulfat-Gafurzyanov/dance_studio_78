@@ -1,20 +1,20 @@
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from src.core.constants import (
-    STYLE_DESCRIPTION_MAX_LENGTH,
-    STYLE_DESCRIPTION_MIN_LENGTH,
-    STYLE_IMAGE_URL_MAX_LENGTH,
-    STYLE_IMAGE_URL_MIN_LENGTH,
-    STYLE_NAME_MAX_LENGTH,
-    STYLE_NAME_MIN_LENGTH,
+    DESCRIPTION_MAX_LENGTH,
+    DESCRIPTION_MIN_LENGTH,
+    IMAGE_URL_MAX_LENGTH,
+    IMAGE_URL_MIN_LENGTH,
+    NAME_MAX_LENGTH,
+    NAME_MIN_LENGTH,
 )
 
 
 class StyleImageCreate(BaseModel):
     """Схема для загрузки изображения стиля."""
     url: str = Field(
-        min_length=STYLE_IMAGE_URL_MIN_LENGTH,
-        max_length=STYLE_IMAGE_URL_MAX_LENGTH
+        min_length=IMAGE_URL_MIN_LENGTH,
+        max_length=IMAGE_URL_MAX_LENGTH
     )
     sort_order: int = Field(default=1, ge=1)  # место в карусели фото.
 
@@ -45,13 +45,13 @@ class StyleCreate(BaseModel):
     При создании поле is_active=false (на уровне БД).
     """
     name: str = Field(
-        min_length=STYLE_NAME_MIN_LENGTH,
-        max_length=STYLE_NAME_MAX_LENGTH
+        min_length=NAME_MIN_LENGTH,
+        max_length=NAME_MAX_LENGTH
     )
     description: str | None = Field(
         default=None,
-        min_length=STYLE_DESCRIPTION_MIN_LENGTH,
-        max_length=STYLE_DESCRIPTION_MAX_LENGTH
+        min_length=DESCRIPTION_MIN_LENGTH,
+        max_length=DESCRIPTION_MAX_LENGTH
     )
 
 
@@ -59,13 +59,13 @@ class StyleUpdate(BaseModel):
     """Схема для обновления полей у стиля танца."""
     name: str | None = Field(
         default=None,
-        min_length=STYLE_NAME_MIN_LENGTH,
-        max_length=STYLE_NAME_MAX_LENGTH
+        min_length=NAME_MIN_LENGTH,
+        max_length=NAME_MAX_LENGTH
     )
     description: str | None = Field(
         default=None,
-        min_length=STYLE_DESCRIPTION_MIN_LENGTH,
-        max_length=STYLE_DESCRIPTION_MAX_LENGTH
+        min_length=DESCRIPTION_MIN_LENGTH,
+        max_length=DESCRIPTION_MAX_LENGTH
     )
     is_active: bool | None = Field(default=None)
 

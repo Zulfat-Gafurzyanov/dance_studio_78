@@ -2,9 +2,9 @@ from sqlalchemy import BigInteger, Boolean, false, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.core.constants import (
-    STYLE_DESCRIPTION_MAX_LENGTH,
-    STYLE_IMAGE_URL_MAX_LENGTH,
-    STYLE_NAME_MAX_LENGTH,
+    DESCRIPTION_MAX_LENGTH,
+    IMAGE_URL_MAX_LENGTH,
+    NAME_MAX_LENGTH,
 )
 from src.db.base import Base
 
@@ -16,7 +16,7 @@ class StyleImage(Base):
     id: Mapped[int] = mapped_column(
         BigInteger, primary_key=True, autoincrement=True)
 
-    url: Mapped[str] = mapped_column(String(STYLE_IMAGE_URL_MAX_LENGTH))
+    url: Mapped[str] = mapped_column(String(IMAGE_URL_MAX_LENGTH))
     sort_order: Mapped[int] = mapped_column(default=1)
     style_id: Mapped[int] = mapped_column(
         BigInteger,
@@ -32,8 +32,8 @@ class Style(Base):
     id: Mapped[int] = mapped_column(
         BigInteger, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(
-        String(STYLE_NAME_MAX_LENGTH), unique=True, nullable=False)
+        String(NAME_MAX_LENGTH), unique=True, nullable=False)
     description: Mapped[str | None] = mapped_column(
-        String(STYLE_DESCRIPTION_MAX_LENGTH))
+        String(DESCRIPTION_MAX_LENGTH))
     is_active: Mapped[bool] = mapped_column(
         Boolean, server_default=false(), nullable=False)

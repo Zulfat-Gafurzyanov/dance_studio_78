@@ -80,11 +80,12 @@ class StyleRepository(BaseRepository):
             *values
         )
 
-    async def delete(self, style_id: int) -> str:
-        return await self.execute(
+    async def delete(self, style_id: int) -> asyncpg.Record | None:
+        return await self.fetch_row(
             """
             DELETE FROM style
             WHERE id = $1
+            RETURNING id
             """,
             style_id
         )
