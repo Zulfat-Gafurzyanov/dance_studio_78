@@ -11,10 +11,12 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from src.core.security import decode_access_token
 from src.db import pool as db_pool_module
 from src.repository.style import StyleRepository
+from src.repository.teacher import TeacherRepository
 from src.repository.user import UserRepository
 from src.service.admin import AdminService
 from src.service.auth import AuthService
 from src.service.style import StyleService
+from src.service.teacher import TeacherService
 from src.service.user import UserService
 
 security_scheme = HTTPBearer()
@@ -55,7 +57,10 @@ async def get_current_admin(
 ) -> int:
     payload = decode_access_token(credentials.credentials)
     if payload["role"] != "admin":
-        raise HTTPException(status_code=403, detail="Доступ запрещён: требуются права администратора")
+        raise HTTPException(
+            status_code=403,
+            detail="Доступ запрещён: требуются права администратора"
+        )
     user_id = payload["user_id"]
     user = await UserRepository(conn).get_by_id(user_id)
     if not user or not user["is_active"]:
@@ -103,3 +108,15 @@ async def get_style_service(
     repo: Annotated[StyleRepository, Depends(get_style_repository)],
 ) -> StyleService:
     return StyleService(repo)
+
+
+async def get_teacher_repository(
+    conn: Annotated[asyncpg.Connection, Depends(get_db)],
+) -> TeacherRepository:
+    return TeacherRepository(conn)
+
+
+async def get_teacher_service(
+    repo: Annotated[TeacherRepository, Depends(get_teacher_repository)],
+) -> TeacherService:
+    return TeacherService(repo)
