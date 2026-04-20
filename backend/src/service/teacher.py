@@ -5,6 +5,7 @@ from src.schemas.teacher import (
     TeacherCreate,
     TeacherPhotoCreate,
     TeacherPhotoResponse,
+    TeacherPhotoUpdate,
     TeacherResponse,
     TeacherUpdate,
 )
@@ -112,6 +113,18 @@ class TeacherService:
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "Ошибка при добавлении фото"
             )
+        return TeacherPhotoResponse(
+            id=record["photo_id"],
+            url=record["url"],
+            sort_order=record["sort_order"],
+        )
+
+    async def update_photo(
+            self, photo_id: int, data: TeacherPhotoUpdate) -> TeacherPhotoResponse:
+        record = await self.repository.update_photo(photo_id, data.sort_order)
+        if not record:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, "Фото не найдено")
         return TeacherPhotoResponse(
             id=record["photo_id"],
             url=record["url"],

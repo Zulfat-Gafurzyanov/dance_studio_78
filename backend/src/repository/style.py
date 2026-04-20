@@ -117,6 +117,19 @@ class StyleRepository(BaseRepository):
             sort_order
         )
 
+    async def update_image(
+            self, image_id: int, sort_order: int) -> asyncpg.Record | None:
+        return await self.fetch_row(
+            """
+            UPDATE imagestyle
+            SET sort_order = $1
+            WHERE id = $2
+            RETURNING id AS image_id, url, sort_order
+            """,
+            sort_order,
+            image_id
+        )
+
     async def delete_image(self, image_id: int) -> asyncpg.Record | None:
         return await self.fetch_row(
             """

@@ -19,6 +19,11 @@ class TeacherPhotoCreate(BaseModel):
     sort_order: int = Field(default=1, ge=1)
 
 
+class TeacherPhotoUpdate(BaseModel):
+    """Схема для обновления sort_order фото."""
+    sort_order: int = Field(ge=1)
+
+
 class TeacherPhotoResponse(BaseModel):
     """Схема фото преподавателя для ответа API."""
     model_config = ConfigDict(from_attributes=True)

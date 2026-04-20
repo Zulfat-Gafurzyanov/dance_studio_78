@@ -7,6 +7,7 @@ from src.schemas.style import (
     StyleCreate,
     StyleImageCreate,
     StyleImageResponse,
+    StyleImageUpdate,
     StyleResponse,
     StyleUpdate,
 )
@@ -79,6 +80,18 @@ async def add_image(
     style_service: Annotated[StyleService, Depends(get_style_service)],
 ) -> StyleImageResponse:
     return await style_service.add_image(style_id, body)
+
+
+@router.patch(
+    "/images/{image_id}",
+    dependencies=[Depends(get_current_admin)],
+)
+async def update_image(
+    image_id: int,
+    body: StyleImageUpdate,
+    style_service: Annotated[StyleService, Depends(get_style_service)],
+) -> StyleImageResponse:
+    return await style_service.update_image(image_id, body)
 
 
 @router.delete(

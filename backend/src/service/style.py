@@ -5,6 +5,7 @@ from src.schemas.style import (
     StyleCreate,
     StyleImageCreate,
     StyleImageResponse,
+    StyleImageUpdate,
     StyleResponse,
     StyleUpdate,
 )
@@ -97,6 +98,18 @@ class StyleService:
                 status.HTTP_500_INTERNAL_SERVER_ERROR,
                 "Ошибка при добавлении изображения"
             )
+        return StyleImageResponse(
+            id=record["image_id"],
+            url=record["url"],
+            sort_order=record["sort_order"],
+        )
+
+    async def update_image(
+            self, image_id: int, data: StyleImageUpdate) -> StyleImageResponse:
+        record = await self.repository.update_image(image_id, data.sort_order)
+        if not record:
+            raise HTTPException(
+                status.HTTP_404_NOT_FOUND, "Изображение не найдено")
         return StyleImageResponse(
             id=record["image_id"],
             url=record["url"],

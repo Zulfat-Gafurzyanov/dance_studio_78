@@ -16,7 +16,12 @@ class StyleImageCreate(BaseModel):
         min_length=IMAGE_URL_MIN_LENGTH,
         max_length=IMAGE_URL_MAX_LENGTH
     )
-    sort_order: int = Field(default=1, ge=1)  # место в карусели фото.
+    sort_order: int = Field(default=1, ge=1)
+
+
+class StyleImageUpdate(BaseModel):
+    """Схема для обновления sort_order изображения."""
+    sort_order: int = Field(ge=1)
 
 
 class StyleImageResponse(BaseModel):

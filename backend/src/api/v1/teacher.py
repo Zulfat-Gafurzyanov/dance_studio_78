@@ -7,6 +7,7 @@ from src.schemas.teacher import (
     TeacherCreate,
     TeacherPhotoCreate,
     TeacherPhotoResponse,
+    TeacherPhotoUpdate,
     TeacherResponse,
     TeacherUpdate,
 )
@@ -79,6 +80,18 @@ async def add_photo(
     teacher_service: Annotated[TeacherService, Depends(get_teacher_service)],
 ) -> TeacherPhotoResponse:
     return await teacher_service.add_photo(teacher_id, body)
+
+
+@router.patch(
+    "/photos/{photo_id}",
+    dependencies=[Depends(get_current_admin)],
+)
+async def update_photo(
+    photo_id: int,
+    body: TeacherPhotoUpdate,
+    teacher_service: Annotated[TeacherService, Depends(get_teacher_service)],
+) -> TeacherPhotoResponse:
+    return await teacher_service.update_photo(photo_id, body)
 
 
 @router.delete(

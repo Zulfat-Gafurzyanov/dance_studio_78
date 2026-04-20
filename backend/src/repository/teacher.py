@@ -115,6 +115,19 @@ class TeacherRepository(BaseRepository):
             sort_order
         )
 
+    async def update_photo(
+            self, photo_id: int, sort_order: int) -> asyncpg.Record | None:
+        return await self.fetch_row(
+            """
+            UPDATE phototeacher
+            SET sort_order = $1
+            WHERE id = $2
+            RETURNING id AS photo_id, url, sort_order
+            """,
+            sort_order,
+            photo_id
+        )
+
     async def delete_photo(self, photo_id: int) -> asyncpg.Record | None:
         return await self.fetch_row(
             """

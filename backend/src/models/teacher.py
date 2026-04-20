@@ -30,10 +30,14 @@ class Teacher(Base):
     __tablename__ = "teacher"
 
     id: Mapped[int] = mapped_column(
-        BigInteger, primary_key=True, autoincrement=True)
+        BigInteger, primary_key=True, autoincrement=True
+    )
     name: Mapped[str] = mapped_column(
-        String(NAME_MAX_LENGTH), unique=True, nullable=False)
+        String(NAME_MAX_LENGTH), unique=True, nullable=False
+    )
     bio: Mapped[str | None] = mapped_column(
-        String(DESCRIPTION_MAX_LENGTH))
+        String(DESCRIPTION_MAX_LENGTH)
+    )
     is_active: Mapped[bool] = mapped_column(
-        Boolean, server_default=false(), nullable=False)
+        Boolean, server_default=false(), nullable=False
+    )

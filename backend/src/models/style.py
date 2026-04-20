@@ -14,8 +14,8 @@ class StyleImage(Base):
     __tablename__ = "imagestyle"
 
     id: Mapped[int] = mapped_column(
-        BigInteger, primary_key=True, autoincrement=True)
-
+        BigInteger, primary_key=True, autoincrement=True
+    )
     url: Mapped[str] = mapped_column(String(IMAGE_URL_MAX_LENGTH))
     sort_order: Mapped[int] = mapped_column(default=1)
     style_id: Mapped[int] = mapped_column(
@@ -32,8 +32,11 @@ class Style(Base):
     id: Mapped[int] = mapped_column(
         BigInteger, primary_key=True, autoincrement=True)
     name: Mapped[str] = mapped_column(
-        String(NAME_MAX_LENGTH), unique=True, nullable=False)
+        String(NAME_MAX_LENGTH), unique=True, nullable=False
+    )
     description: Mapped[str | None] = mapped_column(
-        String(DESCRIPTION_MAX_LENGTH))
+        String(DESCRIPTION_MAX_LENGTH)
+    )
     is_active: Mapped[bool] = mapped_column(
-        Boolean, server_default=false(), nullable=False)
+        Boolean, server_default=false(), nullable=False
+    )
