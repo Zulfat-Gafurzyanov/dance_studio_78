@@ -60,6 +60,8 @@ class AuthService:
         user = await self.repository.get_by_id(user_id)
         if not user:
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Пользователь не найден")
+        if not user["is_active"]:
+            raise HTTPException(status.HTTP_403_FORBIDDEN, "Аккаунт заблокирован")
 
         access = create_access_token(user_id, user["role"])
         new_refresh, jti = create_refresh_token(user_id)

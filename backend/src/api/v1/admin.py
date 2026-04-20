@@ -1,8 +1,10 @@
 from typing import Annotated
 
+import redis.asyncio as redis
 from fastapi import APIRouter, Depends, Query
 
-from src.api.deps import get_admin_service, get_current_admin
+from src.api.deps import get_admin_service, get_current_admin, get_redis
+from src.core.security import revoke_all_user_tokens
 from src.schemas.user import UserActiveUpdate, UserProfile, UserRoleUpdate
 from src.service.admin import AdminService
 
@@ -44,5 +46,9 @@ async def set_user_active(
     user_id: int,
     body: UserActiveUpdate,
     admin_service: Annotated[AdminService, Depends(get_admin_service)],
+    redis_client: Annotated[redis.Redis, Depends(get_redis)],
 ) -> UserProfile:
-    return await admin_service.set_active(user_id, body.is_active)
+    result = await admin_service.set_active(user_id, body.is_active)
+    if not body.is_active:
+        await revoke_all_user_tokens(user_id, redis_client)
+    return result

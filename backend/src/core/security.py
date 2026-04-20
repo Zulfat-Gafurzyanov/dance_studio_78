@@ -119,3 +119,11 @@ async def store_refresh_token(
     """Сохраняет JTI refresh-токена в Redis с TTL."""
     key = f"user:{user_id}:refresh:{jti}"
     await redis_client.setex(key, settings.REFRESH_TOKEN_LIFETIME, "1")
+
+
+async def revoke_all_user_tokens(user_id: int, redis_client: redis.Redis) -> None:
+    """Удаляет все refresh-токены пользователя из Redis."""
+    pattern = f"user:{user_id}:refresh:*"
+    keys = await redis_client.keys(pattern)
+    if keys:
+        await redis_client.delete(*keys)
