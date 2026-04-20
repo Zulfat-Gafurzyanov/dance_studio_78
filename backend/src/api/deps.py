@@ -10,11 +10,13 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from src.core.security import decode_access_token
 from src.db import pool as db_pool_module
+from src.repository.studioinfo import StudioInfoRepository
 from src.repository.style import StyleRepository
 from src.repository.teacher import TeacherRepository
 from src.repository.user import UserRepository
 from src.service.admin import AdminService
 from src.service.auth import AuthService
+from src.service.studioinfo import StudioInfoService
 from src.service.style import StyleService
 from src.service.teacher import TeacherService
 from src.service.user import UserService
@@ -120,3 +122,17 @@ async def get_teacher_service(
     repo: Annotated[TeacherRepository, Depends(get_teacher_repository)],
 ) -> TeacherService:
     return TeacherService(repo)
+
+
+async def get_studioinfo_repository(
+    conn: Annotated[asyncpg.Connection, Depends(get_db)],
+) -> StudioInfoRepository:
+    return StudioInfoRepository(conn)
+
+
+async def get_studioinfo_service(
+    repo: Annotated[
+        StudioInfoRepository, Depends(get_studioinfo_repository)
+    ],
+) -> StudioInfoService:
+    return StudioInfoService(repo)
