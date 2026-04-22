@@ -19,6 +19,16 @@
     <div class="grid-2">
         <div class="card">
             <h2>Данные аккаунта</h2>
+            <div class="profile-meta" id="profile-meta" style="margin-bottom:20px;display:none">
+                <div class="profile-meta-row">
+                    <span class="contact-label">Роль</span>
+                    <span id="profile-role">—</span>
+                </div>
+                <div class="profile-meta-row">
+                    <span class="contact-label">Регистрация</span>
+                    <span id="profile-created">—</span>
+                </div>
+            </div>
             <form id="form-profile">
                 <div class="form-group">
                     <label>Email</label>
@@ -51,20 +61,28 @@ renderNav();
 
 const container = document.querySelector(".container");
 
+const roleLabels = { user: "Пользователь", admin: "Администратор" };
+
 api.getMe().then(user => {
     document.getElementById("profile-email").value = user.email ?? "";
+    document.getElementById("profile-role").textContent = roleLabels[user.role] ?? user.role;
+    document.getElementById("profile-created").textContent =
+        new Date(user.created_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
+    document.getElementById("profile-meta").style.display = "block";
 }).catch(err => showAlert(container, err.message));
 
 document.getElementById("form-profile").addEventListener("submit", async (e) => {
     e.preventDefault();
     const body = {};
-    const email = e.target.email.value;
+    const email    = e.target.email.value.trim();
     const password = e.target.password.value;
-    if (email) body.email = email;
+    if (email)    body.email    = email;
     if (password) body.password = password;
+    if (!Object.keys(body).length) return;
     try {
         await api.updateMe(body);
         showAlert(container, "Профиль обновлён", "success");
+        e.target.password.value = "";
     } catch (err) {
         showAlert(container, err.message);
     }

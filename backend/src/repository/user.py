@@ -62,6 +62,35 @@ class UserRepository(BaseRepository):
             email,
         )
 
+    async def update_password(
+        self, user_id: int, password_hash: str
+    ) -> asyncpg.Record | None:
+        return await self.fetch_row(
+            """
+            UPDATE "user"
+            SET password_hash = $2, updated_at = NOW()
+            WHERE id = $1
+            RETURNING id, email, is_active, created_at, role
+            """,
+            user_id,
+            password_hash,
+        )
+
+    async def update_email_and_password(
+        self, user_id: int, email: str, password_hash: str
+    ) -> asyncpg.Record | None:
+        return await self.fetch_row(
+            """
+            UPDATE "user"
+            SET email = $2, password_hash = $3, updated_at = NOW()
+            WHERE id = $1
+            RETURNING id, email, is_active, created_at, role
+            """,
+            user_id,
+            email,
+            password_hash,
+        )
+
     async def set_active(
         self, user_id: int, is_active: bool
     ) -> asyncpg.Record | None:

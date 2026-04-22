@@ -1,7 +1,8 @@
 from fastapi import HTTPException, status
 
+from src.core.security import hash_password
 from src.repository.user import UserRepository
-from src.schemas.user import UserProfile
+from src.schemas.user import UserProfile, UserUpdate
 
 
 class UserService:
@@ -10,6 +11,21 @@ class UserService:
 
     async def get_profile(self, user_id: int) -> UserProfile:
         user = await self.repository.get_by_id(user_id)
+        if not user:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Пользователь не найден")
+        return UserProfile(**dict(user))
+
+    async def update_profile(self, user_id: int, data: UserUpdate) -> UserProfile:
+        if data.email and data.password:
+            user = await self.repository.update_email_and_password(
+                user_id, data.email, hash_password(data.password)
+            )
+        elif data.email:
+            user = await self.repository.update_email(user_id, data.email)
+        else:
+            user = await self.repository.update_password(
+                user_id, hash_password(data.password)
+            )
         if not user:
             raise HTTPException(status.HTTP_404_NOT_FOUND, "Пользователь не найден")
         return UserProfile(**dict(user))

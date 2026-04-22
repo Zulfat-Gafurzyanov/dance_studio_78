@@ -1,4 +1,6 @@
-const BASE_URL = "http://localhost:8000/api/v1";
+const BASE_URL = window.location.hostname === "localhost"
+    ? "http://localhost:8000/api/v1"
+    : "/api/v1";
 
 function getToken() {
     return localStorage.getItem("access_token");
@@ -29,6 +31,7 @@ async function request(method, path, body = null, auth = true) {
 
     if (res.status === 204) return null;
 
+    if (res.status === 403) { window.location.href = errorsPath() + "403.html"; return; }
     if (res.status === 500) { window.location.href = errorsPath() + "500.html"; return; }
     if (res.status === 503) { window.location.href = errorsPath() + "503.html"; return; }
 

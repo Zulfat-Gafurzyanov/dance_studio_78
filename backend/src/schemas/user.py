@@ -19,10 +19,11 @@ class UserProfile(BaseModel):
 
 class UserUpdate(BaseModel):
     email: EmailStr | None = None
+    password: str | None = None
 
     @model_validator(mode="after")
     def check_at_least_one_field(self) -> "UserUpdate":
-        if self.email is None:
+        if self.email is None and self.password is None:
             raise ValueError("Необходимо указать хотя бы одно поле")
         return self
 

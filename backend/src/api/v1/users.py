@@ -23,7 +23,7 @@ async def update_profile(
     user_id: Annotated[int, Depends(get_current_user_id)],
     user_service: Annotated[UserService, Depends(get_user_service)],
 ) -> UserProfile:
-    return await user_service.update_email(user_id, body.email)
+    return await user_service.update_profile(user_id, body)
 
 
 @router.delete("/me", status_code=204)
