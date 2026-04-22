@@ -10,12 +10,14 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
 from src.core.security import decode_access_token
 from src.db import pool as db_pool_module
+from src.repository.price import PriceRepository
 from src.repository.studioinfo import StudioInfoRepository
 from src.repository.style import StyleRepository
 from src.repository.teacher import TeacherRepository
 from src.repository.user import UserRepository
 from src.service.admin import AdminService
 from src.service.auth import AuthService
+from src.service.price import PriceService
 from src.service.studioinfo import StudioInfoService
 from src.service.style import StyleService
 from src.service.teacher import TeacherService
@@ -122,6 +124,18 @@ async def get_teacher_service(
     repo: Annotated[TeacherRepository, Depends(get_teacher_repository)],
 ) -> TeacherService:
     return TeacherService(repo)
+
+
+async def get_price_repository(
+    conn: Annotated[asyncpg.Connection, Depends(get_db)],
+) -> PriceRepository:
+    return PriceRepository(conn)
+
+
+async def get_price_service(
+    repo: Annotated[PriceRepository, Depends(get_price_repository)],
+) -> PriceService:
+    return PriceService(repo)
 
 
 async def get_studioinfo_repository(

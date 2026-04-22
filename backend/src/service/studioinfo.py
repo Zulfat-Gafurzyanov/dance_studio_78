@@ -29,7 +29,7 @@ class StudioInfoService:
         return self._to_response(row)
 
     async def update(self, data: StudioInfoUpdate) -> StudioInfoResponse:
-        fields = data.model_dump(exclude_none=True)
+        fields = data.model_dump(exclude_unset=True)
         if not fields:
             return await self.get()
         row = await self.repository.update(fields)
