@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 — Доступ запрещён</title>
+    <link rel="stylesheet" href="errors.css">
+    <style>
+        /* Фейс-контроль — вход закрыт */
+        body {
+            background: radial-gradient(ellipse 80% 80% at 50% 50%,
+                #140008, var(--black));
+        }
+
+        .rope {
+            display: flex; align-items: center; gap: 0;
+            margin-bottom: 40px; width: 420px; max-width: 90vw;
+        }
+        .rope-post {
+            width: 14px; height: 80px;
+            background: linear-gradient(180deg, #c8a84b, #8a6f2e, #c8a84b);
+            border-radius: 3px;
+            flex-shrink: 0;
+            box-shadow: 0 0 20px rgba(200,168,75,.4);
+        }
+        .rope-line {
+            flex: 1; height: 6px;
+            background: linear-gradient(90deg, #c8a84b, #a07830, #c8a84b);
+            border-radius: 3px;
+            box-shadow: 0 0 12px rgba(200,168,75,.35);
+            position: relative; top: 10px;
+            animation: ropeSwing 3s ease-in-out infinite;
+            transform-origin: left center;
+        }
+        @keyframes ropeSwing {
+            0%, 100% { transform: rotate(-1deg) scaleY(1); }
+            50%       { transform: rotate(1deg) scaleY(1.3); }
+        }
+
+        .error-code {
+            background: linear-gradient(135deg, var(--red), #8a0025);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { filter: brightness(1); }
+            50%       { filter: brightness(1.25); }
+        }
+
+        .bouncer {
+            font-size: 56px; margin-bottom: 16px; display: block;
+            animation: shake 6s ease-in-out infinite;
+        }
+        @keyframes shake {
+            0%, 85%, 100% { transform: translateX(0) rotate(0deg); }
+            88%  { transform: translateX(-5px) rotate(-2deg); }
+            91%  { transform: translateX(5px)  rotate(2deg); }
+            94%  { transform: translateX(-3px) rotate(-1deg); }
+            97%  { transform: translateX(3px)  rotate(1deg); }
+        }
+
+        .badge-no {
+            display: inline-block;
+            background: rgba(232,0,61,.15);
+            border: 1px solid rgba(232,0,61,.3);
+            color: var(--red);
+            font-size: 10px; font-weight: 700;
+            letter-spacing: 3px; text-transform: uppercase;
+            padding: 5px 14px; margin-bottom: 20px;
+        }
+
+        .btn-home {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid rgba(255,184,0,.4);
+        }
+        .btn-home:hover {
+            background: var(--gold);
+            color: var(--black);
+            border-color: var(--gold);
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-noise"></div>
+
+    <div class="content">
+        <span class="bouncer">🚫</span>
+        <div class="rope">
+            <div class="rope-post"></div>
+            <div class="rope-line"></div>
+            <div class="rope-post"></div>
+        </div>
+        <div class="badge-no">Фейс-контроль</div>
+        <div class="error-code">403</div>
+        <div class="error-title">Вход закрыт</div>
+        <p class="error-desc">У тебя нет доступа к этой зоне. Войди в аккаунт или обратись к администратору студии.</p>
+        <a href="../index.html" class="btn-home">← На главную</a>
+    </div>
+</body>
+</html>

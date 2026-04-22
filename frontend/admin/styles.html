@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Стили — Админка</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav id="nav"></nav>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <h3>Управление</h3>
+        <a href="users.html">Пользователи</a>
+        <a href="styles.html">Стили</a>
+        <a href="teachers.html">Преподаватели</a>
+        <a href="studio.html">Студия</a>
+    </aside>
+
+    <div class="admin-content">
+        <div class="page-header">
+            <div class="page-label">Админка</div>
+            <h1>СТИЛИ ТАНЦА</h1>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <div class="card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                        <h2 style="margin:0">Список</h2>
+                        <select id="filter-active" class="filter-inline">
+                            <option value="">Все</option>
+                            <option value="active">Активные</option>
+                            <option value="hidden">Скрытые</option>
+                        </select>
+                    </div>
+                    <div id="styles-list" class="item-list"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card" id="create-section">
+                    <h2>Добавить стиль</h2>
+                    <form id="form-create">
+                        <div class="form-group">
+                            <label>Название</label>
+                            <input name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <textarea name="description"></textarea>
+                        </div>
+                        <button class="btn btn-primary">Создать</button>
+                    </form>
+                </div>
+
+                <div class="card" id="edit-section" style="display:none">
+                    <h2>Изменить стиль</h2>
+                    <input type="hidden" id="edit-id">
+                    <form id="form-edit">
+                        <div class="form-group">
+                            <label>Название</label>
+                            <input name="name">
+                        </div>
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <textarea name="description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Статус</label>
+                            <select name="is_active">
+                                <option value="">Не менять</option>
+                                <option value="true">Активен</option>
+                                <option value="false">Скрыт</option>
+                            </select>
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn btn-primary">Сохранить</button>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="showCreate()">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card" id="photo-section" style="display:none">
+                    <h2>Добавить фото</h2>
+                    <input type="hidden" id="photo-style-id">
+                    <form id="form-photo">
+                        <div class="form-group">
+                            <label>URL</label>
+                            <input name="url" required placeholder="https://...">
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn btn-primary">Добавить</button>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="document.getElementById('photo-section').style.display='none'">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { api } from "../js/api.js";
+import { requireAdmin, renderNav, showAlert, showConfirm, hideUntilReady } from "../js/utils.js";
+import { buildPhotoGrid, initPhotoGrids } from "../js/photos.js";
+
+hideUntilReady();
+requireAdmin();
+renderNav();
+
+document.querySelector('.admin-sidebar a[href="styles.html"]').classList.add("active");
+
+const content = document.querySelector(".admin-content");
+
+let allStyles = [];
+
+function renderStyles() {
+    const filter = document.getElementById("filter-active").value;
+    const list   = document.getElementById("styles-list");
+    const items  = allStyles.filter(s => {
+        if (filter === "active") return s.is_active;
+        if (filter === "hidden") return !s.is_active;
+        return true;
+    });
+    if (!items.length) { list.innerHTML = "<p style='color:var(--muted)'>Стилей нет</p>"; return; }
+    list.innerHTML = items.map(s => `
+            <div class="item-card">
+                <div class="item-card-header">
+                    <strong>${s.name}</strong>
+                    <span class="badge ${s.is_active ? "badge-green" : "badge-red"}">${s.is_active ? "активен" : "скрыт"}</span>
+                </div>
+                <p>${s.description || "—"}</p>
+                ${buildPhotoGrid(s.images, s.id, "deleteImage")}
+                <div class="btn-row" style="margin-top:12px">
+                    <button class="btn btn-sm btn-secondary"
+                        onclick="openEdit(${s.id}, \`${s.name}\`, \`${s.description ?? ""}\`, ${s.is_active})">Изменить</button>
+                    <button class="btn btn-sm btn-primary" onclick="openPhoto(${s.id})">+ Фото</button>
+                    <button class="btn btn-sm btn-danger" onclick="del(${s.id})">Удалить</button>
+                </div>
+            </div>
+        `).join("");
+    initPhotoGrids(api.updateStyleImage, content);
+}
+
+async function load() {
+    try {
+        allStyles = await api.getStyles();
+        renderStyles();
+    } catch (err) { showAlert(content, err.message); }
+}
+
+document.getElementById("filter-active").addEventListener("change", renderStyles);
+
+document.getElementById("form-create").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = e.target.name.value;
+    const description = e.target.description.value || undefined;
+    try { await api.createStyle({ name, description }); e.target.reset(); await load(); }
+    catch (err) { showAlert(content, err.message); }
+});
+
+document.getElementById("form-edit").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = parseInt(document.getElementById("edit-id").value);
+    const body = {};
+    const name = e.target.name.value;
+    const description = e.target.description.value;
+    const is_active = e.target.is_active.value;
+    if (name) body.name = name;
+    if (description) body.description = description;
+    if (is_active !== "") body.is_active = is_active === "true";
+    try {
+        await api.updateStyle(id, body);
+        window.showCreate();
+        await load();
+    } catch (err) { showAlert(content, err.message); }
+});
+
+document.getElementById("form-photo").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = parseInt(document.getElementById("photo-style-id").value);
+    const url = e.target.url.value;
+    const grid = document.querySelector(`.photo-grid[data-id="${id}"]`);
+    const sort_order = grid ? grid.querySelectorAll(".photo-thumb").length + 1 : 1;
+    try {
+        await api.addStyleImage(id, { url, sort_order });
+        e.target.reset();
+        document.getElementById("photo-section").style.display = "none";
+        await load();
+    } catch (err) { showAlert(content, err.message); }
+});
+
+window.showCreate = () => {
+    document.getElementById("create-section").style.display = "block";
+    document.getElementById("edit-section").style.display = "none";
+};
+
+window.openEdit = (id, name, description, is_active) => {
+    document.getElementById("create-section").style.display = "none";
+    document.getElementById("edit-section").style.display = "block";
+    document.getElementById("edit-id").value = id;
+    document.querySelector("#form-edit [name=name]").value = name;
+    document.querySelector("#form-edit [name=description]").value = description;
+    document.querySelector("#form-edit [name=is_active]").value = String(is_active);
+    document.getElementById("edit-section").scrollIntoView({ behavior: "smooth" });
+};
+
+window.openPhoto = (styleId) => {
+    document.getElementById("photo-section").style.display = "block";
+    document.getElementById("photo-style-id").value = styleId;
+    document.getElementById("photo-section").scrollIntoView({ behavior: "smooth" });
+};
+
+window.del = async (id) => {
+    if (!await showConfirm("Стиль будет удалён безвозвратно.", "Удалить стиль?")) return;
+    try { await api.deleteStyle(id); await load(); }
+    catch (err) { showAlert(content, err.message); }
+};
+
+window.deleteImage = async (id) => {
+    if (!await showConfirm("Фото будет удалено безвозвратно.", "Удалить фото?")) return;
+    try { await api.deleteStyleImage(id); await load(); }
+    catch (err) { showAlert(content, err.message); }
+};
+
+load();
+</script>
+</body>
+</html>

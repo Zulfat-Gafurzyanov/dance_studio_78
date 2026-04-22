@@ -1,0 +1,372 @@
+/* ── Landing nav override ── */
+#nav {
+    position: fixed;
+    width: 100%;
+    box-sizing: border-box;
+    background: linear-gradient(to bottom, rgba(10,10,10,.95), transparent);
+    border-bottom: none;
+    padding: 0 60px;
+    height: 70px;
+    transition: background .3s, border-color .3s;
+}
+#nav.scrolled {
+    background: rgba(10,10,10,.97);
+    border-bottom: 1px solid var(--border);
+}
+.nav-section-links {
+    display: flex; gap: 4px; flex: 1; justify-content: center;
+}
+.nav-section-links a {
+    color: rgba(245,240,232,.55);
+    text-decoration: none;
+    padding: 6px 14px;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    transition: color .2s;
+}
+.nav-section-links a:hover { color: var(--gold); }
+.nav-auth { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+.nav-auth a {
+    color: rgba(245,240,232,.55);
+    text-decoration: none;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    transition: color .2s;
+}
+.nav-auth a:hover { color: var(--white); }
+.nav-auth a.btn-nav {
+    border: 1px solid rgba(232,0,61,.4);
+    color: rgba(232,0,61,.8);
+    padding: 6px 16px;
+}
+.nav-auth a.btn-nav:hover {
+    background: var(--red); color: #fff; border-color: var(--red);
+}
+
+/* ── Hero + About combined ── */
+#hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    position: relative; overflow: hidden;
+    padding: 100px 60px;
+    padding-top: 140px;
+    background: var(--black);
+}
+.hero-bg {
+    position: absolute; inset: 0;
+    background:
+        radial-gradient(ellipse 60% 80% at 70% 50%, rgba(232,0,61,.18) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 60% at 20% 80%, rgba(255,107,0,.12) 0%, transparent 60%);
+}
+.hero-lines {
+    position: absolute; inset: 0;
+    background-image: repeating-linear-gradient(
+        90deg, rgba(255,255,255,.03) 0px, rgba(255,255,255,.03) 1px, transparent 1px, transparent 80px
+    );
+}
+.hero-combined {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 80px;
+    align-items: center;
+    width: 100%;
+}
+.hero-left {}
+.hero-tag {
+    display: inline-block;
+    background: var(--red);
+    color: #fff; font-size: 11px; font-weight: 700;
+    letter-spacing: 3px; text-transform: uppercase;
+    padding: 6px 16px; margin-bottom: 28px;
+}
+.hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(72px, 10vw, 130px);
+    line-height: .92; letter-spacing: 2px;
+    color: var(--white); margin-bottom: 28px;
+}
+.hero-title span {
+    color: transparent;
+    -webkit-text-stroke: 2px var(--gold);
+}
+.hero-sub {
+    font-size: 15px; font-weight: 300;
+    color: rgba(245,240,232,.65);
+    max-width: 420px; line-height: 1.8;
+}
+.hero-right {
+    display: flex; flex-direction: column; gap: 40px;
+}
+.hero-about-text p {
+    color: rgba(245,240,232,.7);
+    font-size: 14px; line-height: 1.9; margin-bottom: 14px;
+}
+.hero-about-text p:last-child { margin-bottom: 0; }
+.hero-number {
+    position: absolute; right: 0; bottom: -60px;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 200px; line-height: 1;
+    color: rgba(255,255,255,.025);
+    user-select: none; pointer-events: none; letter-spacing: -8px;
+}
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+.hero-left > * { animation: fadeUp .7s ease both; }
+.hero-left > *:nth-child(1) { animation-delay: .1s; }
+.hero-left > *:nth-child(2) { animation-delay: .25s; }
+.hero-left > *:nth-child(3) { animation-delay: .4s; }
+.hero-right { animation: fadeUp .7s ease .3s both; }
+
+/* ── Sections common ── */
+.section { padding: 64px 60px; scroll-margin-top: 70px; }
+.section-dark { background: var(--dark); }
+.section-black { background: var(--black); }
+.section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--red); margin-bottom: 16px;
+}
+.section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 5vw, 64px);
+    line-height: 1; letter-spacing: 2px; margin-bottom: 20px;
+}
+.divider {
+    width: 60px; height: 3px;
+    background: linear-gradient(90deg, var(--red), var(--orange));
+    margin-bottom: 48px;
+}
+
+/* ── About stats ── */
+.about-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.stat-box { border-left: 3px solid var(--red); padding-left: 20px; }
+.stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 52px; line-height: 1; color: var(--gold);
+}
+.stat-label {
+    font-size: 12px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: var(--muted); margin-top: 4px;
+}
+
+/* ── Dynamic cards ── */
+.dynamic-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 28px;
+}
+.dynamic-grid .dyn-card {
+    flex: 0 0 calc(33.333% - 19px);
+}
+.dynamic-grid.cols-2 .dyn-card {
+    flex: 0 0 calc(50% - 14px);
+}
+.dyn-card {
+    background: var(--card);
+    overflow: hidden; position: relative;
+    transition: transform .25s;
+}
+.dyn-card:hover { transform: translateY(-6px); }
+.dyn-card::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--red), var(--orange), var(--gold));
+}
+.dyn-card-body { padding: 24px 28px; }
+.dyn-card-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px; letter-spacing: 2px; color: var(--white); margin-bottom: 8px;
+}
+.dyn-card-desc { font-size: 13px; color: rgba(245,240,232,.6); line-height: 1.7; }
+
+/* ── Carousel ── */
+.carousel {
+    position: relative;
+    overflow: hidden;
+    background: var(--card2);
+    width: 100%;
+    /* aspect-ratio задаётся инлайн на элементе */
+}
+.carousel-track {
+    display: flex;
+    height: 100%;
+    transition: transform .35s ease;
+}
+.carousel-slide {
+    width: 100%;
+    height: 100%;
+    flex-shrink: 0;
+}
+.carousel-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.carousel--contain .carousel-slide img {
+    object-fit: contain;
+}
+.carousel-btn {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    background: rgba(10,10,10,.75); border: 1px solid rgba(255,255,255,.15);
+    color: var(--white); width: 36px; height: 36px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px; transition: background .2s;
+    z-index: 2; user-select: none;
+}
+.carousel-btn:hover { background: var(--red); border-color: var(--red); }
+.carousel-btn.prev { left: 8px; }
+.carousel-btn.next { right: 8px; }
+.carousel-dots {
+    position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 6px; z-index: 2;
+}
+.carousel-dot {
+    width: 6px; height: 6px; background: rgba(255,255,255,.35);
+    border-radius: 50%; cursor: pointer; transition: background .2s, transform .2s;
+}
+.carousel-dot.active { background: var(--red); transform: scale(1.3); }
+
+/* ── Schedule ── */
+.schedule-table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.schedule-table th {
+    font-size: 11px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--gold);
+    padding: 14px 20px; text-align: left;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+.schedule-table td {
+    padding: 18px 20px; color: rgba(245,240,232,.8);
+    border-bottom: 1px solid rgba(255,255,255,.04);
+}
+.schedule-table tr:hover td { background: rgba(255,255,255,.03); }
+.tag {
+    display: inline-block;
+    font-size: 10px; font-weight: 700; letter-spacing: 2px;
+    text-transform: uppercase; padding: 4px 10px;
+}
+.tag-reg { background: rgba(232,0,61,.2);    color: var(--red); }
+.tag-beg { background: rgba(255,107,0,.2);   color: var(--orange); }
+.tag-adv { background: rgba(255,184,0,.2);   color: var(--gold); }
+.tag-kids{ background: rgba(100,200,100,.15); color: #7ecf7e; }
+
+/* ── Prices ── */
+.prices-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 28px; }
+.price-card {
+    background: var(--card); padding: 44px 36px;
+    position: relative; overflow: hidden; transition: transform .25s;
+}
+.price-card:hover { transform: translateY(-6px); }
+.price-card.featured {
+    background: linear-gradient(160deg, #1f0a12, #1a0a0a);
+    border: 1px solid rgba(232,0,61,.3);
+}
+.price-card.featured::after {
+    content: 'ХИТ';
+    position: absolute; top: 20px; right: -28px;
+    background: var(--red); color: #fff;
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    padding: 6px 40px; transform: rotate(45deg);
+}
+.price-name {
+    font-size: 11px; font-weight: 700; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--muted); margin-bottom: 20px;
+}
+.price-amount {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 64px; line-height: 1; color: var(--white); margin-bottom: 4px;
+}
+.price-amount sup {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 22px; font-weight: 300; color: var(--muted);
+}
+.price-period { font-size: 12px; color: var(--muted); margin-bottom: 32px; }
+.price-features { list-style: none; }
+.price-features li {
+    font-size: 13px; color: rgba(245,240,232,.7);
+    padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+    display: flex; align-items: center; gap: 10px;
+}
+.price-features li::before { content: '✓'; color: var(--red); font-weight: 700; }
+
+/* ── Contacts ── */
+.contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+.contact-item { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 36px; }
+.contact-icon {
+    width: 48px; height: 48px; flex-shrink: 0;
+    background: var(--card);
+    display: flex; align-items: center; justify-content: center; font-size: 20px;
+}
+.contact-label {
+    font-size: 10px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--red); margin-bottom: 6px;
+}
+.contact-value { font-size: 15px; color: var(--white); }
+.contact-tg { color: #29a7e1; text-decoration: none; transition: color .2s; }
+.contact-tg:hover { color: #fff; }
+.contact-ig { color: #29a7e1; text-decoration: none; transition: color .2s; }
+.contact-ig:hover { color: #fff; }
+.map-placeholder {
+    aspect-ratio: 4/3;
+    overflow: hidden;
+}
+
+/* ── Footer ── */
+footer {
+    background: #050505; padding: 40px 60px;
+    display: flex; justify-content: space-between; align-items: center;
+    border-top: 1px solid rgba(255,255,255,.05);
+}
+.footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 24px; letter-spacing: 4px; color: var(--gold);
+}
+.footer-copy { font-size: 12px; color: var(--muted); }
+.footer-socials { display: flex; gap: 16px; }
+.social-btn {
+    width: 40px; height: 40px; background: var(--card);
+    display: flex; align-items: center; justify-content: center;
+    text-decoration: none; transition: background .2s; color: #fff;
+}
+.social-btn svg { width: 20px; height: 20px; fill: currentColor; }
+.social-btn:hover { background: var(--red); }
+
+/* ── Booking ── */
+.booking-section { text-align: center; }
+.booking-desc {
+    color: var(--muted);
+    font-size: 15px;
+    margin: 0 auto 40px;
+    max-width: 480px;
+    line-height: 1.7;
+}
+.booking-btn {
+    display: inline-block;
+    background: var(--red);
+    color: #fff;
+    text-decoration: none;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase;
+    padding: 18px 52px;
+    border: 2px solid var(--red);
+    transition: background .2s, color .2s, border-color .2s;
+}
+.booking-btn:hover {
+    background: transparent;
+    color: var(--red);
+}
+
+@media (max-width: 900px) {
+    #nav { padding: 0 24px; }
+    .section { padding: 44px 24px; }
+    .hero-combined, .contacts-grid { grid-template-columns: 1fr; gap: 40px; }
+    .prices-grid { grid-template-columns: 1fr; }
+    .nav-section-links { display: none; }
+    #hero { padding: 64px 24px; padding-top: 100px; }
+    footer { padding: 32px 24px; flex-direction: column; gap: 16px; text-align: center; }
+    .dynamic-grid .dyn-card,
+    .dynamic-grid.cols-2 .dyn-card { flex: 0 0 100%; }
+}

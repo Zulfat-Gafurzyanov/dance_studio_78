@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Преподаватели — Админка</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav id="nav"></nav>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <h3>Управление</h3>
+        <a href="users.html">Пользователи</a>
+        <a href="styles.html">Стили</a>
+        <a href="teachers.html">Преподаватели</a>
+        <a href="prices.html">Цены</a>
+        <a href="studio.html">Студия</a>
+    </aside>
+
+    <div class="admin-content">
+        <div class="page-header">
+            <div class="page-label">Админка</div>
+            <h1>ПРЕПОДАВАТЕЛИ</h1>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <div class="card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                        <h2 style="margin:0">Список</h2>
+                        <select id="filter-active" class="filter-inline">
+                            <option value="">Все</option>
+                            <option value="active">Активные</option>
+                            <option value="hidden">Скрытые</option>
+                        </select>
+                    </div>
+                    <div id="teachers-list" class="item-list"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card" id="create-section">
+                    <h2>Добавить преподавателя</h2>
+                    <form id="form-create">
+                        <div class="form-group">
+                            <label>Имя</label>
+                            <input name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Биография</label>
+                            <textarea name="bio"></textarea>
+                        </div>
+                        <button class="btn btn-primary">Создать</button>
+                    </form>
+                </div>
+
+                <div class="card" id="edit-section" style="display:none">
+                    <h2>Изменить преподавателя</h2>
+                    <input type="hidden" id="edit-id">
+                    <form id="form-edit">
+                        <div class="form-group">
+                            <label>Имя</label>
+                            <input name="name">
+                        </div>
+                        <div class="form-group">
+                            <label>Биография</label>
+                            <textarea name="bio"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Статус</label>
+                            <select name="is_active">
+                                <option value="">Не менять</option>
+                                <option value="true">Активен</option>
+                                <option value="false">Скрыт</option>
+                            </select>
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn btn-primary">Сохранить</button>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="showCreate()">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card" id="photo-section" style="display:none">
+                    <h2>Добавить фото</h2>
+                    <input type="hidden" id="photo-teacher-id">
+                    <form id="form-photo">
+                        <div class="form-group">
+                            <label>URL</label>
+                            <input name="url" required placeholder="https://...">
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn btn-primary">Добавить</button>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="document.getElementById('photo-section').style.display='none'">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { api } from "../js/api.js";
+import { requireAdmin, renderNav, showAlert, showConfirm, hideUntilReady } from "../js/utils.js";
+import { buildPhotoGrid, initPhotoGrids } from "../js/photos.js";
+
+hideUntilReady();
+requireAdmin();
+renderNav();
+
+document.querySelector('.admin-sidebar a[href="teachers.html"]').classList.add("active");
+
+const content = document.querySelector(".admin-content");
+
+let allTeachers = [];
+
+function renderTeachers() {
+    const filter = document.getElementById("filter-active").value;
+    const list   = document.getElementById("teachers-list");
+    const items  = allTeachers.filter(t => {
+        if (filter === "active") return t.is_active;
+        if (filter === "hidden") return !t.is_active;
+        return true;
+    });
+    if (!items.length) { list.innerHTML = "<p style='color:var(--muted)'>Преподавателей нет</p>"; return; }
+    list.innerHTML = items.map(t => `
+            <div class="item-card">
+                <div class="item-card-header">
+                    <strong>${t.name}</strong>
+                    <span class="badge ${t.is_active ? "badge-green" : "badge-red"}">${t.is_active ? "активен" : "скрыт"}</span>
+                </div>
+                <p>${t.bio || "—"}</p>
+                ${buildPhotoGrid(t.photos, t.id, "deletePhoto")}
+                <div class="btn-row" style="margin-top:12px">
+                    <button class="btn btn-sm btn-secondary"
+                        onclick="openEdit(${t.id}, \`${t.name}\`, \`${t.bio ?? ""}\`, ${t.is_active})">Изменить</button>
+                    <button class="btn btn-sm btn-primary" onclick="openPhoto(${t.id})">+ Фото</button>
+                    <button class="btn btn-sm btn-danger" onclick="del(${t.id})">Удалить</button>
+                </div>
+            </div>
+        `).join("");
+    initPhotoGrids(api.updateTeacherPhoto, content);
+}
+
+async function load() {
+    try {
+        allTeachers = await api.getTeachers();
+        renderTeachers();
+    } catch (err) { showAlert(content, err.message); }
+}
+
+document.getElementById("filter-active").addEventListener("change", renderTeachers);
+
+document.getElementById("form-create").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = e.target.name.value;
+    const bio = e.target.bio.value || undefined;
+    try { await api.createTeacher({ name, bio }); e.target.reset(); await load(); }
+    catch (err) { showAlert(content, err.message); }
+});
+
+document.getElementById("form-edit").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = parseInt(document.getElementById("edit-id").value);
+    const body = {};
+    const name = e.target.name.value;
+    const bio = e.target.bio.value;
+    const is_active = e.target.is_active.value;
+    if (name) body.name = name;
+    if (bio) body.bio = bio;
+    if (is_active !== "") body.is_active = is_active === "true";
+    try {
+        await api.updateTeacher(id, body);
+        window.showCreate();
+        await load();
+    } catch (err) { showAlert(content, err.message); }
+});
+
+document.getElementById("form-photo").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = parseInt(document.getElementById("photo-teacher-id").value);
+    const url = e.target.url.value;
+    const grid = document.querySelector(`.photo-grid[data-id="${id}"]`);
+    const sort_order = grid ? grid.querySelectorAll(".photo-thumb").length + 1 : 1;
+    try {
+        await api.addTeacherPhoto(id, { url, sort_order });
+        e.target.reset();
+        document.getElementById("photo-section").style.display = "none";
+        await load();
+    } catch (err) { showAlert(content, err.message); }
+});
+
+window.showCreate = () => {
+    document.getElementById("create-section").style.display = "block";
+    document.getElementById("edit-section").style.display = "none";
+};
+
+window.openEdit = (id, name, bio, is_active) => {
+    document.getElementById("create-section").style.display = "none";
+    document.getElementById("edit-section").style.display = "block";
+    document.getElementById("edit-id").value = id;
+    document.querySelector("#form-edit [name=name]").value = name;
+    document.querySelector("#form-edit [name=bio]").value = bio;
+    document.querySelector("#form-edit [name=is_active]").value = String(is_active);
+    document.getElementById("edit-section").scrollIntoView({ behavior: "smooth" });
+};
+
+window.openPhoto = (teacherId) => {
+    document.getElementById("photo-section").style.display = "block";
+    document.getElementById("photo-teacher-id").value = teacherId;
+    document.getElementById("photo-section").scrollIntoView({ behavior: "smooth" });
+};
+
+window.del = async (id) => {
+    if (!await showConfirm("Преподаватель будет удалён безвозвратно.", "Удалить преподавателя?")) return;
+    try { await api.deleteTeacher(id); await load(); }
+    catch (err) { showAlert(content, err.message); }
+};
+
+window.deletePhoto = async (id) => {
+    if (!await showConfirm("Фото будет удалено безвозвратно.", "Удалить фото?")) return;
+    try { await api.deleteTeacherPhoto(id); await load(); }
+    catch (err) { showAlert(content, err.message); }
+};
+
+load();
+</script>
+</body>
+</html>

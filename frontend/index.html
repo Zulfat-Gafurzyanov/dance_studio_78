@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Танцевальная студия 78</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+    <a class="nav-brand" href="#">78<span> DANCE</span></a>
+    <div class="nav-section-links">
+        <a href="#styles">Направления</a>
+        <a href="#teachers">Преподаватели</a>
+        <a href="#prices">Цены</a>
+        <a href="#booking">Запись</a>
+        <a href="#contacts">Контакты</a>
+    </div>
+    <div class="nav-auth" id="nav-auth"></div>
+</nav>
+
+<!-- HERO + ABOUT -->
+<section id="hero" id="about">
+    <div class="hero-bg"></div>
+    <div class="hero-lines"></div>
+    <div class="hero-combined">
+        <div class="hero-left">
+            <div class="hero-tag">Казань</div>
+            <h1 class="hero-title">СЕМЬ<br><span>ВОСЕМЬ</span></h1>
+            <p class="hero-sub"><span id="hero-styles"></span> — найди свой стиль. Живая энергия, свобода движения, настоящий танец.</p>
+        </div>
+        <div class="hero-right">
+            <div class="hero-about-text">
+                <div class="section-label">О студии</div>
+                <div class="divider"></div>
+                <p>Студия «78 Dance» — это место, где танец становится частью тебя. Мы работаем с людьми любого уровня — от тех, кто никогда не танцевал, до тех, кто хочет выйти на сцену.</p>
+                <p>Без оценок, без давления — только музыка и движение.</p>
+            </div>
+            <div class="about-stats">
+                <div class="stat-box">
+                    <div class="stat-num" id="stat-years">—</div>
+                    <div class="stat-label">Лет на рынке</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="stat-students">—</div>
+                    <div class="stat-label">Учеников</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="stat-styles">—</div>
+                    <div class="stat-label">Направлений</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-num" id="stat-teachers">—</div>
+                    <div class="stat-label">Преподавателей</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="hero-number">78</div>
+</section>
+
+<!-- STYLES -->
+<section id="styles" class="section section-black">
+    <div class="section-label">Направления</div>
+    <h2 class="section-title">СТИЛИ ТАНЦА</h2>
+    <div class="divider"></div>
+    <div id="styles-list" class="dynamic-grid"></div>
+</section>
+
+<!-- TEACHERS -->
+<section id="teachers" class="section section-dark">
+    <div class="section-label">Команда</div>
+    <h2 class="section-title">НАШИ ПРЕПОДАВАТЕЛИ</h2>
+    <div class="divider"></div>
+    <div id="teachers-list" class="dynamic-grid"></div>
+</section>
+
+
+<!-- PRICES -->
+<section id="prices" class="section section-dark">
+    <div class="section-label">Стоимость</div>
+    <h2 class="section-title">ЦЕНЫ</h2>
+    <div class="divider"></div>
+    <div class="prices-grid" id="prices-list"></div>
+</section>
+
+<!-- BOOKING -->
+<section id="booking" class="section section-black booking-section">
+    <div class="section-label">Онлайн-запись</div>
+    <h2 class="section-title">ЗАПИШИСЬ НА ЗАНЯТИЕ</h2>
+    <div class="divider"></div>
+    <p class="booking-desc">Выбери удобное время и направление — запись займёт меньше минуты.</p>
+    <a class="booking-btn" href="https://elflowdancemailru.impulsecrm.ru/widget/1" target="_blank" rel="noopener">
+        Записаться онлайн
+    </a>
+</section>
+
+<!-- CONTACTS -->
+<section id="contacts" class="section section-black">
+    <div class="section-label">Связь и соцсети</div>
+    <h2 class="section-title">КОНТАКТЫ</h2>
+    <div class="divider"></div>
+    <div class="contacts-grid">
+        <div>
+            <div class="contact-item" id="contact-address-wrap">
+                <div class="contact-icon">📍</div>
+                <div>
+                    <div class="contact-label">Адрес</div>
+                    <div class="contact-value" id="contact-address">—</div>
+                </div>
+            </div>
+            <div class="contact-item" id="contact-phone-wrap">
+                <div class="contact-icon">📞</div>
+                <div>
+                    <div class="contact-label">Телефон</div>
+                    <div class="contact-value" id="contact-phone">—</div>
+                </div>
+            </div>
+            <div class="contact-item" id="contact-hours-wrap">
+                <div class="contact-icon">⏰</div>
+                <div>
+                    <div class="contact-label">Режим работы</div>
+                    <div class="contact-value" id="contact-hours">—</div>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+                </div>
+                <div>
+                    <div class="contact-label">Менеджер</div>
+                    <a class="contact-value contact-tg" href="https://t.me/SemVosem_dance" target="_blank" rel="noopener">Написать в Telegram</a>
+                </div>
+            </div>
+            <div class="contact-item" id="contact-email-wrap">
+                <div class="contact-icon">✉️</div>
+                <div>
+                    <div class="contact-label">Email</div>
+                    <div class="contact-value" id="contact-email">—</div>
+                </div>
+            </div>
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                </div>
+                <div>
+                    <div class="contact-label">Instagram</div>
+                    <a class="contact-value contact-ig" href="https://www.instagram.com/78_dance/" target="_blank" rel="noopener">@78_dance</a>
+                </div>
+            </div>
+        </div>
+        <div class="map-placeholder">
+            <iframe
+                src="https://www.openstreetmap.org/export/embed.html?bbox=49.08295512199402%2C55.81235706023744%2C49.09299731254578%2C55.81689632113036&layer=mapnik&marker=55.8146267568664%2C49.0879762172699"
+                width="100%"
+                height="100%"
+                frameborder="0"
+                style="border:0;display:block"
+            ></iframe>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <div class="footer-logo">78 DANCE</div>
+    <div class="footer-copy">© 2025 Студия «78 Dance». Все права защищены.</div>
+</footer>
+
+<script type="module">
+import { api } from "./js/api.js";
+import { isLoggedIn, isAdmin, clearTokens } from "./js/utils.js";
+
+// ── Studio info ───────────────────────────────────────
+function roundStudents(n) {
+    if (n < 100) return String(n);
+    const step = n >= 1000 ? 500 : 100;
+    return Math.floor(n / step) * step + "+";
+}
+
+api.getStudioInfo().then(s => {
+    // Stats
+    const years = new Date().getFullYear() - s.year_opened;
+    document.getElementById("stat-years").textContent    = years > 0 ? years : 1;
+    document.getElementById("stat-students").textContent = roundStudents(s.students_count);
+
+    // Contacts
+    const set = (wrapId, valueId, val) => {
+        const wrap = document.getElementById(wrapId);
+        if (!wrap) return;
+        if (val) {
+            document.getElementById(valueId).textContent = val;
+        } else {
+            wrap.style.display = "none";
+        }
+    };
+    set("contact-address-wrap", "contact-address", s.address);
+    set("contact-phone-wrap",   "contact-phone",   s.phone);
+    set("contact-hours-wrap",   "contact-hours",   s.working_hours);
+    set("contact-email-wrap",   "contact-email",   s.email);
+
+}).catch(() => {});
+
+// ── Auth nav ──────────────────────────────────────────
+const authEl = document.getElementById("nav-auth");
+if (isLoggedIn()) {
+    authEl.innerHTML = `
+        ${isAdmin() ? `<a href="admin/users.html">Админка</a>` : ""}
+        <a href="profile.html">Профиль</a>
+        <a href="#" id="nav-logout" class="btn-nav">Выйти</a>
+    `;
+    document.getElementById("nav-logout").addEventListener("click", e => {
+        e.preventDefault();
+        clearTokens();
+        window.location.reload();
+    });
+} else {
+    authEl.innerHTML = `<a href="auth.html" class="btn-nav">Войти</a>`;
+}
+
+// ── Sticky nav ────────────────────────────────────────
+window.addEventListener("scroll", () => {
+    document.getElementById("nav").classList.toggle("scrolled", window.scrollY > 60);
+});
+
+// ── Carousel ─────────────────────────────────────────
+function buildCarousel(photos, aspect, fit = "cover") {
+    if (!photos.length) return "";
+    const sorted = [...photos].sort((a, b) => a.sort_order - b.sort_order);
+    const cls = fit === "contain" ? " carousel--contain" : "";
+    const slide = p =>
+        `<div class="carousel-slide">` +
+        `<img src="${p.url}" alt="" loading="lazy" onerror="this.parentElement.style.background='var(--card2)';this.remove()">` +
+        `</div>`;
+    if (sorted.length === 1) {
+        return `<div class="carousel${cls}" style="aspect-ratio:${aspect}">${slide(sorted[0])}</div>`;
+    }
+    const slides = sorted.map(slide).join("");
+    const dots = sorted.map((_, i) =>
+        `<span class="carousel-dot${i === 0 ? " active" : ""}" data-i="${i}"></span>`
+    ).join("");
+    return `
+        <div class="carousel${cls}" style="aspect-ratio:${aspect}">
+            <div class="carousel-track">${slides}</div>
+            <button class="carousel-btn prev">&#8249;</button>
+            <button class="carousel-btn next">&#8250;</button>
+            <div class="carousel-dots">${dots}</div>
+        </div>
+    `;
+}
+
+function initCarousels() {
+    document.querySelectorAll(".carousel").forEach(el => {
+        const track = el.querySelector(".carousel-track");
+        const dots  = el.querySelectorAll(".carousel-dot");
+        const total = el.querySelectorAll(".carousel-slide").length;
+        if (total <= 1) return;
+
+        let current = 0;
+        function goTo(i) {
+            current = (i + total) % total;
+            track.style.transform = `translateX(-${current * 100}%)`;
+            dots.forEach((d, idx) => d.classList.toggle("active", idx === current));
+        }
+        el.querySelector(".prev").addEventListener("click", () => goTo(current - 1));
+        el.querySelector(".next").addEventListener("click", () => goTo(current + 1));
+        dots.forEach(d => d.addEventListener("click", () => goTo(+d.dataset.i)));
+    });
+}
+
+// ── Grid columns logic ───────────────────────────────
+function applyGridCols(container, count) {
+    container.classList.toggle("cols-2", count === 2 || count === 4);
+}
+
+// ── Styles ────────────────────────────────────────────
+api.getStyles().then(styles => {
+    const el = document.getElementById("styles-list");
+    const active = styles.filter(s => s.is_active);
+
+    const heroStyles = document.getElementById("hero-styles");
+    if (heroStyles) heroStyles.textContent = active.length ? active.map(s => s.name).join(", ") : "";
+    document.getElementById("stat-styles").textContent = active.length;
+
+    if (!active.length) { el.innerHTML = "<p style='color:var(--muted)'>Скоро здесь появятся направления</p>"; return; }
+    el.innerHTML = active.map(s => `
+        <div class="dyn-card">
+            ${buildCarousel(s.images, "4/3", "contain")}
+            <div class="dyn-card-body">
+                <div class="dyn-card-name">${s.name}</div>
+                <p class="dyn-card-desc">${s.description || ""}</p>
+            </div>
+        </div>
+    `).join("");
+    applyGridCols(el, active.length);
+    initCarousels();
+}).catch(() => {});
+
+// ── Prices ────────────────────────────────────────────
+api.getPrices().then(plans => {
+    const el = document.getElementById("prices-list");
+    const active = plans.filter(p => p.is_active);
+    if (!active.length) { el.innerHTML = "<p style='color:var(--muted)'>Скоро здесь появятся тарифы</p>"; return; }
+    el.innerHTML = active.map(p => `
+        <div class="price-card${p.is_recommended ? " featured" : ""}">
+            <div class="price-name">${p.name}</div>
+            <div class="price-amount"><sup>₽</sup>${p.price.toLocaleString("ru-RU")}</div>
+            ${p.subtitle ? `<div class="price-period">${p.subtitle}</div>` : ""}
+            ${p.options.length ? `
+            <ul class="price-features">
+                ${p.options.sort((a, b) => a.sort_order - b.sort_order).map(o => `<li>${o.text}</li>`).join("")}
+            </ul>` : ""}
+        </div>
+    `).join("");
+}).catch(() => {});
+
+// ── Teachers ──────────────────────────────────────────
+api.getTeachers().then(teachers => {
+    const el = document.getElementById("teachers-list");
+    const active = teachers.filter(t => t.is_active);
+    document.getElementById("stat-teachers").textContent = active.length;
+    if (!active.length) { el.innerHTML = "<p style='color:var(--muted)'>Скоро здесь появятся преподаватели</p>"; return; }
+    el.innerHTML = active.map(t => `
+        <div class="dyn-card">
+            ${buildCarousel(t.photos, "3/4")}
+            <div class="dyn-card-body">
+                <div class="dyn-card-name">${t.name}</div>
+                <p class="dyn-card-desc">${t.bio || ""}</p>
+            </div>
+        </div>
+    `).join("");
+    applyGridCols(el, active.length);
+    initCarousels();
+}).catch(() => {});
+</script>
+</body>
+</html>

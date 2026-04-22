@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Цены — Админка</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav id="nav"></nav>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <h3>Управление</h3>
+        <a href="users.html">Пользователи</a>
+        <a href="styles.html">Стили</a>
+        <a href="teachers.html">Преподаватели</a>
+        <a href="prices.html">Цены</a>
+        <a href="studio.html">Студия</a>
+    </aside>
+
+    <div class="admin-content">
+        <div class="page-header">
+            <div class="page-label">Админка</div>
+            <h1>ЦЕНЫ</h1>
+        </div>
+
+        <div class="grid-2">
+            <div>
+                <div class="card">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                        <h2 style="margin:0">Список</h2>
+                        <select id="filter-active" class="filter-inline">
+                            <option value="">Все</option>
+                            <option value="active">Активные</option>
+                            <option value="hidden">Скрытые</option>
+                        </select>
+                    </div>
+                    <div id="prices-list" class="item-list"></div>
+                </div>
+            </div>
+
+            <div>
+                <div class="card" id="create-section">
+                    <h2>Добавить тариф</h2>
+                    <form id="form-create">
+                        <div class="form-group">
+                            <label>Название</label>
+                            <input name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <textarea name="description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Цена (₽)</label>
+                            <input name="price" type="number" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Подзаголовок</label>
+                            <input name="subtitle" placeholder="700 ₽ за занятие · месяц">
+                        </div>
+                        <div class="form-group">
+                            <label>Порядок</label>
+                            <input name="sort_order" type="number" min="1" value="1">
+                        </div>
+                        <button class="btn btn-primary">Создать</button>
+                    </form>
+                </div>
+
+                <div class="card" id="edit-section" style="display:none">
+                    <h2>Изменить тариф</h2>
+                    <input type="hidden" id="edit-id">
+                    <form id="form-edit">
+                        <div class="form-group">
+                            <label>Название</label>
+                            <input name="name">
+                        </div>
+                        <div class="form-group">
+                            <label>Описание</label>
+                            <textarea name="description"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Цена (₽)</label>
+                            <input name="price" type="number" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Подзаголовок</label>
+                            <input name="subtitle">
+                        </div>
+                        <div class="form-group">
+                            <label>Порядок</label>
+                            <input name="sort_order" type="number" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>Статус</label>
+                            <select name="is_active">
+                                <option value="">Не менять</option>
+                                <option value="true">Активен</option>
+                                <option value="false">Скрыт</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Рекомендуемый</label>
+                            <select name="is_recommended">
+                                <option value="">Не менять</option>
+                                <option value="true">Да</option>
+                                <option value="false">Нет</option>
+                            </select>
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn btn-primary">Сохранить</button>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="showCreate()">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card" id="option-section" style="display:none">
+                    <h2>Добавить пункт</h2>
+                    <input type="hidden" id="option-plan-id">
+                    <form id="form-option">
+                        <div class="form-group">
+                            <label>Текст</label>
+                            <input name="text" required placeholder="8 занятий в месяц">
+                        </div>
+                        <div class="btn-row">
+                            <button class="btn btn-primary">Добавить</button>
+                            <button type="button" class="btn btn-secondary"
+                                onclick="document.getElementById('option-section').style.display='none'">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { api } from "../js/api.js";
+import { requireAdmin, renderNav, showAlert, showConfirm, hideUntilReady } from "../js/utils.js";
+
+hideUntilReady();
+requireAdmin();
+renderNav();
+
+document.querySelector('.admin-sidebar a[href="prices.html"]').classList.add("active");
+
+const content = document.querySelector(".admin-content");
+
+let allPlans = [];
+
+function buildOptionList(options, planId) {
+    if (!options.length) return "";
+    const sorted = [...options].sort((a, b) => a.sort_order - b.sort_order);
+    return `<ul class="price-options-admin">
+        ${sorted.map(o => `
+            <li>
+                <span>${o.text}</span>
+                <button class="btn btn-sm btn-danger" onclick="delOption(${o.id}, ${planId})">×</button>
+            </li>
+        `).join("")}
+    </ul>`;
+}
+
+function renderPlans() {
+    const filter = document.getElementById("filter-active").value;
+    const list   = document.getElementById("prices-list");
+    const items  = allPlans.filter(p => {
+        if (filter === "active") return p.is_active;
+        if (filter === "hidden") return !p.is_active;
+        return true;
+    });
+    if (!items.length) { list.innerHTML = "<p style='color:var(--muted)'>Тарифов нет</p>"; return; }
+    list.innerHTML = items.map(p => `
+        <div class="item-card">
+            <div class="item-card-header">
+                <strong>${p.name}</strong>
+                <div style="display:flex;gap:6px">
+                    ${p.is_recommended ? `<span class="badge badge-blue">хит</span>` : ""}
+                    <span class="badge ${p.is_active ? "badge-green" : "badge-red"}">${p.is_active ? "активен" : "скрыт"}</span>
+                </div>
+            </div>
+            <p style="font-size:20px;font-weight:700;color:var(--gold);margin:4px 0">
+                ${p.price.toLocaleString("ru-RU")} ₽
+                ${p.subtitle ? `<span style="font-size:12px;font-weight:400;color:var(--muted)">${p.subtitle}</span>` : ""}
+            </p>
+            ${p.description ? `<p style="color:var(--muted);font-size:13px">${p.description}</p>` : ""}
+            ${buildOptionList(p.options, p.id)}
+            <div class="btn-row" style="margin-top:12px">
+                <button class="btn btn-sm btn-secondary" onclick="openEdit(${p.id})">Изменить</button>
+                <button class="btn btn-sm btn-primary" onclick="openOption(${p.id})">+ Пункт</button>
+                <button class="btn btn-sm btn-danger" onclick="del(${p.id})">Удалить</button>
+            </div>
+        </div>
+    `).join("");
+}
+
+async function load() {
+    try {
+        allPlans = await api.getPrices();
+        renderPlans();
+    } catch (err) { showAlert(content, err.message); }
+}
+
+document.getElementById("filter-active").addEventListener("change", renderPlans);
+
+document.getElementById("form-create").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const body = {
+        name: e.target.name.value,
+        price: parseInt(e.target.price.value),
+        sort_order: parseInt(e.target.sort_order.value) || 1,
+    };
+    if (e.target.description.value) body.description = e.target.description.value;
+    if (e.target.subtitle.value) body.subtitle = e.target.subtitle.value;
+    try { await api.createPrice(body); e.target.reset(); await load(); }
+    catch (err) { showAlert(content, err.message); }
+});
+
+document.getElementById("form-edit").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = parseInt(document.getElementById("edit-id").value);
+    const body = {};
+    if (e.target.name.value)        body.name        = e.target.name.value;
+    if (e.target.description.value) body.description = e.target.description.value;
+    if (e.target.price.value)       body.price       = parseInt(e.target.price.value);
+    if (e.target.subtitle.value)    body.subtitle    = e.target.subtitle.value;
+    if (e.target.sort_order.value)  body.sort_order  = parseInt(e.target.sort_order.value);
+    if (e.target.is_active.value !== "")
+        body.is_active = e.target.is_active.value === "true";
+    if (e.target.is_recommended.value !== "")
+        body.is_recommended = e.target.is_recommended.value === "true";
+    try {
+        await api.updatePrice(id, body);
+        window.showCreate();
+        await load();
+    } catch (err) { showAlert(content, err.message); }
+});
+
+document.getElementById("form-option").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const planId = parseInt(document.getElementById("option-plan-id").value);
+    const plan   = allPlans.find(p => p.id === planId);
+    const sort_order = plan ? plan.options.length + 1 : 1;
+    try {
+        await api.addPriceOption(planId, { text: e.target.text.value, sort_order });
+        e.target.reset();
+        document.getElementById("option-section").style.display = "none";
+        await load();
+    } catch (err) { showAlert(content, err.message); }
+});
+
+window.showCreate = () => {
+    document.getElementById("create-section").style.display = "block";
+    document.getElementById("edit-section").style.display = "none";
+};
+
+window.openEdit = (id) => {
+    const p = allPlans.find(p => p.id === id);
+    if (!p) return;
+    document.getElementById("create-section").style.display = "none";
+    document.getElementById("edit-section").style.display = "block";
+    document.getElementById("edit-id").value = id;
+    document.querySelector("#form-edit [name=name]").value        = p.name;
+    document.querySelector("#form-edit [name=description]").value = p.description ?? "";
+    document.querySelector("#form-edit [name=price]").value       = p.price;
+    document.querySelector("#form-edit [name=subtitle]").value    = p.subtitle ?? "";
+    document.querySelector("#form-edit [name=sort_order]").value  = p.sort_order;
+    document.querySelector("#form-edit [name=is_active]").value       = String(p.is_active);
+    document.querySelector("#form-edit [name=is_recommended]").value  = String(p.is_recommended);
+    document.getElementById("edit-section").scrollIntoView({ behavior: "smooth" });
+};
+
+window.openOption = (planId) => {
+    document.getElementById("option-section").style.display = "block";
+    document.getElementById("option-plan-id").value = planId;
+    document.getElementById("option-section").scrollIntoView({ behavior: "smooth" });
+};
+
+window.del = async (id) => {
+    if (!await showConfirm("Тариф будет удалён безвозвратно.", "Удалить тариф?")) return;
+    try { await api.deletePrice(id); await load(); }
+    catch (err) { showAlert(content, err.message); }
+};
+
+window.delOption = async (id, planId) => {
+    if (!await showConfirm("Пункт будет удалён.", "Удалить пункт?")) return;
+    try { await api.deletePriceOption(id); await load(); }
+    catch (err) { showAlert(content, err.message); }
+};
+
+load();
+</script>
+</body>
+</html>

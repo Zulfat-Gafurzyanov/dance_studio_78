@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Пользователи — Админка</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav id="nav"></nav>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <h3>Управление</h3>
+        <a href="users.html">Пользователи</a>
+        <a href="styles.html">Стили</a>
+        <a href="teachers.html">Преподаватели</a>
+        <a href="prices.html">Цены</a>
+        <a href="studio.html">Студия</a>
+    </aside>
+
+    <div class="admin-content">
+        <div class="page-header">
+            <div class="page-label">Админка</div>
+            <h1>ПОЛЬЗОВАТЕЛИ</h1>
+        </div>
+        <div class="filter-bar">
+            <select id="filter-role">
+                <option value="">Все роли</option>
+                <option value="user">user</option>
+                <option value="admin">admin</option>
+            </select>
+            <select id="filter-status">
+                <option value="">Все статусы</option>
+                <option value="active">Активен</option>
+                <option value="blocked">Заблокирован</option>
+            </select>
+        </div>
+
+        <div class="card">
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Email</th>
+                            <th>Роль</th>
+                            <th>Статус</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { api } from "../js/api.js";
+import { requireAdmin, renderNav, showAlert, hideUntilReady } from "../js/utils.js";
+
+hideUntilReady();
+requireAdmin();
+renderNav();
+
+const container = document.querySelector(".admin-content");
+
+document.querySelector('.admin-sidebar a[href="users.html"]').classList.add("active");
+
+let allUsers = [];
+
+function renderTable() {
+    const role   = document.getElementById("filter-role").value;
+    const status = document.getElementById("filter-status").value;
+
+    const filtered = allUsers.filter(u => {
+        if (role && u.role !== role) return false;
+        if (status === "active"  && !u.is_active) return false;
+        if (status === "blocked" &&  u.is_active) return false;
+        return true;
+    });
+
+    document.getElementById("users-tbody").innerHTML = filtered.map(u => `
+        <tr>
+            <td>${u.id}</td>
+            <td>${u.email}</td>
+            <td><span class="badge badge-blue">${u.role}</span></td>
+            <td>
+                <span class="badge ${u.is_active ? "badge-green" : "badge-red"}">
+                    ${u.is_active ? "активен" : "заблокирован"}
+                </span>
+            </td>
+            <td>
+                <div class="btn-row">
+                    <select id="role-${u.id}" style="width:auto;padding:6px 10px">
+                        <option value="user"  ${u.role === "user"  ? "selected" : ""}>user</option>
+                        <option value="admin" ${u.role === "admin" ? "selected" : ""}>admin</option>
+                    </select>
+                    <button class="btn btn-sm btn-secondary" onclick="setRole(${u.id})">Сменить</button>
+                    <button class="btn btn-sm ${u.is_active ? "btn-danger" : "btn-success"}"
+                        onclick="toggleActive(${u.id}, ${!u.is_active})">
+                        ${u.is_active ? "Заблокировать" : "Разблокировать"}
+                    </button>
+                </div>
+            </td>
+        </tr>
+    `).join("") || `<tr><td colspan="5" style="text-align:center;color:var(--muted)">Нет пользователей</td></tr>`;
+}
+
+async function load() {
+    try {
+        allUsers = await api.getUsers();
+        renderTable();
+    } catch (err) {
+        showAlert(container, err.message);
+    }
+}
+
+document.getElementById("filter-role").addEventListener("change", renderTable);
+document.getElementById("filter-status").addEventListener("change", renderTable);
+
+window.setRole = async (id) => {
+    const role = document.getElementById(`role-${id}`).value;
+    try { await api.updateRole(id, role); await load(); }
+    catch (err) { showAlert(container, err.message); }
+};
+
+window.toggleActive = async (id, is_active) => {
+    try { await api.updateActive(id, is_active); await load(); }
+    catch (err) { showAlert(container, err.message); }
+};
+
+load();
+</script>
+</body>
+</html>

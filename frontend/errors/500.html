@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 — Ошибка сервера</title>
+    <link rel="stylesheet" href="errors.css">
+    <style>
+        /* Сцена рухнула */
+        body {
+            background: radial-gradient(ellipse 70% 70% at 50% 30%,
+                #0f0800, var(--black));
+        }
+
+        .stage-light {
+            position: fixed; z-index: 0; pointer-events: none;
+            top: -80px; left: 50%; transform: translateX(-50%);
+            width: 3px; height: 45vh;
+            background: linear-gradient(to bottom, rgba(255,184,0,.7), transparent);
+            box-shadow: 0 0 60px 40px rgba(255,184,0,.06);
+            animation: flicker 0.15s infinite;
+        }
+        @keyframes flicker {
+            0%   { opacity: 1; }
+            15%  { opacity: .6; }
+            25%  { opacity: 1; }
+            50%  { opacity: .4; }
+            55%  { opacity: 1; }
+            70%  { opacity: .8; }
+            80%  { opacity: 1; }
+            90%  { opacity: .5; }
+            95%  { opacity: 1; }
+        }
+
+        .stage-cone {
+            position: fixed; z-index: 0; pointer-events: none;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 15vw solid transparent;
+            border-right: 15vw solid transparent;
+            border-top: 45vh solid rgba(255,184,0,.04);
+            animation: flicker 0.15s infinite;
+        }
+
+        .error-code {
+            color: var(--gold);
+            text-shadow: 0 0 80px rgba(255,184,0,.3);
+            animation: flicker 0.15s infinite;
+        }
+
+        .microphone {
+            font-size: 60px; margin-bottom: 12px; display: block;
+            animation: fall 1s cubic-bezier(.36,.07,.19,.97) both;
+            transform-origin: top center;
+        }
+        @keyframes fall {
+            0%   { transform: rotate(0deg); }
+            30%  { transform: rotate(-20deg); }
+            60%  { transform: rotate(80deg); }
+            80%  { transform: rotate(65deg); }
+            100% { transform: rotate(70deg); }
+        }
+
+        .error-label { color: var(--gold); opacity: .6; }
+        .error-title { color: var(--gold); }
+
+        .btn-home {
+            background: var(--gold); color: var(--black);
+            font-weight: 700;
+        }
+        .btn-home:hover { background: var(--orange); color: #fff; }
+
+        .crack {
+            width: 180px; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+            margin: 20px auto 28px;
+            opacity: .5;
+        }
+    </style>
+</head>
+<body>
+    <div class="stage-light"></div>
+    <div class="stage-cone"></div>
+    <div class="bg-noise"></div>
+
+    <div class="content">
+        <span class="microphone">🎤</span>
+        <div class="error-label">Ошибка сервера</div>
+        <div class="error-code">500</div>
+        <div class="crack"></div>
+        <div class="error-title">Mic Drop. Сервер упал.</div>
+        <p class="error-desc">Что-то пошло не так за кулисами. Мы уже разбираемся. Попробуй чуть позже — шоу должно продолжаться.</p>
+        <a href="../index.html" class="btn-home">← На главную</a>
+    </div>
+</body>
+</html>

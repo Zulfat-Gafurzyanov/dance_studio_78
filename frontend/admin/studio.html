@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Студия — Админка</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+<nav id="nav"></nav>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <h3>Управление</h3>
+        <a href="users.html">Пользователи</a>
+        <a href="styles.html">Стили</a>
+        <a href="teachers.html">Преподаватели</a>
+        <a href="prices.html">Цены</a>
+        <a href="studio.html">Студия</a>
+    </aside>
+
+    <div class="admin-content">
+        <div class="page-header">
+            <div class="page-label">Админка</div>
+            <h1>ИНФОРМАЦИЯ О СТУДИИ</h1>
+        </div>
+
+        <div class="card" style="max-width:560px">
+            <h2>Основная информация</h2>
+            <form id="form-studio">
+                <div class="form-group">
+                    <label>Год открытия</label>
+                    <input type="number" name="year_opened" min="1900" max="2100" required>
+                </div>
+                <div class="form-group">
+                    <label>Количество учеников</label>
+                    <input type="number" name="students_count" min="0" required>
+                    <small style="color:var(--muted);font-size:12px;margin-top:6px;display:block">
+                        На лендинге отобразится с округлением: 847 → 800+
+                    </small>
+                </div>
+
+                <h2 style="margin-top:24px">Контакты</h2>
+                <div class="form-group">
+                    <label>Телефон</label>
+                    <input type="tel" name="phone" placeholder="+7 (999) 123-45-67" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" placeholder="info@studio78.ru">
+                </div>
+                <div class="form-group">
+                    <label>Адрес</label>
+                    <textarea name="address" rows="2" placeholder="ул. Примерная, д. 1"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Режим работы</label>
+                    <textarea name="working_hours" rows="2" placeholder="Пн–Пт: 17:00–22:00&#10;Сб–Вс: 10:00–18:00"></textarea>
+                </div>
+
+                <div style="margin-top:24px">
+                    <button class="btn btn-primary">Сохранить</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script type="module">
+import { api } from "../js/api.js";
+import { requireAdmin, renderNav, showAlert, hideUntilReady } from "../js/utils.js";
+
+hideUntilReady();
+requireAdmin();
+renderNav();
+
+document.querySelector('.admin-sidebar a[href="studio.html"]').classList.add("active");
+
+const content = document.querySelector(".admin-content");
+
+async function load() {
+    try {
+        const s = await api.getStudioInfo();
+        document.querySelector("[name=year_opened]").value    = s.year_opened;
+        document.querySelector("[name=students_count]").value = s.students_count;
+        document.querySelector("[name=phone]").value          = s.phone || "";
+        document.querySelector("[name=email]").value          = s.email || "";
+        document.querySelector("[name=address]").value        = s.address || "";
+        document.querySelector("[name=working_hours]").value  = s.working_hours || "";
+    } catch (err) { showAlert(content, err.message); }
+}
+
+document.getElementById("form-studio").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {
+        year_opened:    parseInt(e.target.year_opened.value),
+        students_count: parseInt(e.target.students_count.value),
+        phone:          e.target.phone.value.trim() || null,
+        email:          e.target.email.value.trim() || null,
+        address:        e.target.address.value.trim() || null,
+        working_hours:  e.target.working_hours.value.trim() || null,
+    };
+    try {
+        await api.updateStudioInfo(payload);
+        showAlert(content, "Сохранено", "success");
+    } catch (err) { showAlert(content, err.message); }
+});
+
+load();
+</script>
+</body>
+</html>
