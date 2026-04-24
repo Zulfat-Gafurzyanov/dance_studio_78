@@ -24,6 +24,18 @@ async def get_all(
     return await teacher_service.get_all()
 
 
+@router.post(
+    "/reorder",
+    dependencies=[Depends(get_current_admin)],
+    status_code=204
+)
+async def reorder(
+    body: list[TeacherReorderItem],
+    teacher_service: Annotated[TeacherService, Depends(get_teacher_service)],
+) -> None:
+    await teacher_service.reorder(body)
+
+
 @router.get("/{teacher_id}")
 async def get_by_id(
     teacher_id: int,
@@ -54,18 +66,6 @@ async def update(
     teacher_service: Annotated[TeacherService, Depends(get_teacher_service)],
 ) -> TeacherResponse:
     return await teacher_service.update(teacher_id, body)
-
-
-@router.put(
-    "/reorder",
-    dependencies=[Depends(get_current_admin)],
-    status_code=204
-)
-async def reorder(
-    body: list[TeacherReorderItem],
-    teacher_service: Annotated[TeacherService, Depends(get_teacher_service)],
-) -> None:
-    await teacher_service.reorder(body)
 
 
 @router.delete(
