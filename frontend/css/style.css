@@ -18,7 +18,7 @@ body {
     background: var(--black);
     color: var(--gold);
     min-height: 100vh;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.6;
 }
 
@@ -287,7 +287,7 @@ select option { background: var(--card); }
 
 .table-wrap { overflow-x: auto; }
 
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
 
 th {
     font-size: 10px;
@@ -390,7 +390,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 }
 
 .item-card p {
-    font-size: 13px;
+    font-size: 14px;
     color: rgba(245,240,232,0.5);
     margin-bottom: 8px;
     padding-left: 12px;
@@ -528,7 +528,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     margin-bottom: 8px;
 }
 
-.pub-card p { font-size: 13px; color: rgba(245,240,232,0.55); line-height: 1.7; }
+.pub-card p { font-size: 15px; color: rgba(245,240,232,0.55); line-height: 1.7; }
 
 /* ── Tabs row (public) ───────────────────────────── */
 
@@ -692,7 +692,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     color: var(--gold); margin-bottom: 8px;
 }
 .confirm-text {
-    font-size: 13px; color: var(--muted);
+    font-size: 14px; color: var(--muted);
     line-height: 1.7; margin-bottom: 28px;
 }
 .confirm-btns {
