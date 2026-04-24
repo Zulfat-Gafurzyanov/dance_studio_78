@@ -114,7 +114,7 @@ export function renderNav(adminLinks = false) {
     if (nav) {
         nav.innerHTML = `
             <a class="nav-brand" href="${root}index.html">
-                <img src="${root}images/logo_78.jpg" alt="Семь-Восемь" class="nav-logo">
+                <img src="${root}images/logo_78.png" alt="Семь-Восемь" class="nav-logo">
             </a>
             <div class="nav-links">
                 ${publicLinks}
