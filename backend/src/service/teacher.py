@@ -6,6 +6,7 @@ from src.schemas.teacher import (
     TeacherPhotoCreate,
     TeacherPhotoResponse,
     TeacherPhotoUpdate,
+    TeacherReorderItem,
     TeacherResponse,
     TeacherUpdate,
 )
@@ -26,6 +27,7 @@ class TeacherService:
                     name=row["name"],
                     bio=row["bio"],
                     is_active=row["is_active"],
+                    sort_order=row["teacher_sort_order"],
                     photos=[],
                 )
             if row["photo_id"] is not None:
@@ -129,6 +131,11 @@ class TeacherService:
             id=record["photo_id"],
             url=record["url"],
             sort_order=record["sort_order"],
+        )
+
+    async def reorder(self, items: list[TeacherReorderItem]) -> None:
+        await self.repository.reorder(
+            [{"id": item.id, "sort_order": item.sort_order} for item in items]
         )
 
     async def delete_photo(self, photo_id: int) -> None:

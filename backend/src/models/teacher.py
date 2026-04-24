@@ -41,3 +41,4 @@ class Teacher(Base):
     is_active: Mapped[bool] = mapped_column(
         Boolean, server_default=false(), nullable=False
     )
+    sort_order: Mapped[int] = mapped_column(default=1, server_default="1")

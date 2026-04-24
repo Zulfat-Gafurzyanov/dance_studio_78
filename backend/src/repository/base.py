@@ -18,3 +18,6 @@ class BaseRepository:
 
     async def execute(self, query: str, *args) -> str:
         return await self.conn.execute(query, *args)
+
+    async def execute_many(self, query: str, args_list: list) -> None:
+        await self.conn.executemany(query, args_list)

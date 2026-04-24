@@ -8,6 +8,7 @@ from src.schemas.teacher import (
     TeacherPhotoCreate,
     TeacherPhotoResponse,
     TeacherPhotoUpdate,
+    TeacherReorderItem,
     TeacherResponse,
     TeacherUpdate,
 )
@@ -53,6 +54,18 @@ async def update(
     teacher_service: Annotated[TeacherService, Depends(get_teacher_service)],
 ) -> TeacherResponse:
     return await teacher_service.update(teacher_id, body)
+
+
+@router.put(
+    "/reorder",
+    dependencies=[Depends(get_current_admin)],
+    status_code=204
+)
+async def reorder(
+    body: list[TeacherReorderItem],
+    teacher_service: Annotated[TeacherService, Depends(get_teacher_service)],
+) -> None:
+    await teacher_service.reorder(body)
 
 
 @router.delete(

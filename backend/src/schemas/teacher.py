@@ -41,7 +41,13 @@ class TeacherResponse(BaseModel):
     name: str
     bio: str | None
     is_active: bool
+    sort_order: int = 1
     photos: list[TeacherPhotoResponse] = Field(default_factory=list)
+
+
+class TeacherReorderItem(BaseModel):
+    id: int
+    sort_order: int = Field(ge=1)
 
 
 class TeacherCreate(BaseModel):

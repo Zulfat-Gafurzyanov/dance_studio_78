@@ -107,6 +107,7 @@ export const api = {
     createTeacher: (data) => request("POST", "/teachers", data),
     updateTeacher: (id, data) => request("PATCH", `/teachers/${id}`, data),
     deleteTeacher: (id) => request("DELETE", `/teachers/${id}`),
+    reorderTeachers: (items) => request("PUT", "/teachers/reorder", items),
     addTeacherPhoto: (id, data) => request("POST", `/teachers/${id}/photos`, data),
     updateTeacherPhoto: (id, sort_order) => request("PATCH", `/teachers/photos/${id}`, { sort_order }),
     deleteTeacherPhoto: (id) => request("DELETE", `/teachers/photos/${id}`),

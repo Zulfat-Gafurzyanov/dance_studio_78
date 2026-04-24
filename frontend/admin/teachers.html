@@ -5,6 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Преподаватели — Админка</title>
     <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .item-card { cursor: default; }
+        .drag-handle {
+            cursor: grab; padding: 0 8px 0 0;
+            color: var(--muted); font-size: 18px; line-height: 1;
+            user-select: none; flex-shrink: 0;
+        }
+        .drag-handle:active { cursor: grabbing; }
+        .item-card.dragging { opacity: 0.4; }
+        .item-card.drag-over { border-color: var(--red); }
+    </style>
 </head>
 <body>
 
@@ -130,8 +141,9 @@ function renderTeachers() {
     });
     if (!items.length) { list.innerHTML = "<p style='color:var(--muted)'>Преподавателей нет</p>"; return; }
     list.innerHTML = items.map(t => `
-            <div class="item-card">
+            <div class="item-card" draggable="true" data-id="${t.id}">
                 <div class="item-card-header">
+                    <span class="drag-handle" title="Перетащить">⠿</span>
                     <strong>${t.name}</strong>
                     <span class="badge ${t.is_active ? "badge-green" : "badge-red"}">${t.is_active ? "активен" : "скрыт"}</span>
                 </div>
@@ -151,6 +163,7 @@ function renderTeachers() {
 async function load() {
     try {
         allTeachers = await api.getTeachers();
+        allTeachers.sort((a, b) => a.sort_order - b.sort_order);
         renderTeachers();
     } catch (err) { showAlert(content, err.message); }
 }
@@ -229,7 +242,64 @@ window.deletePhoto = async (id) => {
     catch (err) { showAlert(content, err.message); }
 };
 
-load();
+function initDragSort() {
+    const list = document.getElementById("teachers-list");
+    let dragged = null;
+
+    list.addEventListener("dragstart", e => {
+        dragged = e.target.closest(".item-card");
+        if (!dragged) return;
+        setTimeout(() => dragged.classList.add("dragging"), 0);
+    });
+
+    list.addEventListener("dragend", () => {
+        if (dragged) dragged.classList.remove("dragging");
+        list.querySelectorAll(".item-card").forEach(c => c.classList.remove("drag-over"));
+        dragged = null;
+    });
+
+    list.addEventListener("dragover", e => {
+        e.preventDefault();
+        const target = e.target.closest(".item-card");
+        if (!target || target === dragged) return;
+        list.querySelectorAll(".item-card").forEach(c => c.classList.remove("drag-over"));
+        target.classList.add("drag-over");
+    });
+
+    list.addEventListener("drop", async e => {
+        e.preventDefault();
+        const target = e.target.closest(".item-card");
+        if (!target || target === dragged) return;
+        target.classList.remove("drag-over");
+
+        const cards = [...list.querySelectorAll(".item-card")];
+        const fromIdx = cards.indexOf(dragged);
+        const toIdx = cards.indexOf(target);
+        if (fromIdx === toIdx) return;
+
+        if (fromIdx < toIdx) target.after(dragged);
+        else target.before(dragged);
+
+        const newOrder = [...list.querySelectorAll(".item-card")].map((c, i) => ({
+            id: parseInt(c.dataset.id),
+            sort_order: i + 1
+        }));
+
+        try {
+            await api.reorderTeachers(newOrder);
+            allTeachers.sort((a, b) => {
+                const ai = newOrder.findIndex(o => o.id === a.id);
+                const bi = newOrder.findIndex(o => o.id === b.id);
+                return ai - bi;
+            });
+        } catch (err) {
+            showAlert(content, err.message);
+            renderTeachers();
+        }
+    });
+}
+
+load().then(() => initDragSort());
 </script>
 </body>
 </html>

@@ -26,12 +26,19 @@ class TeacherRepository(BaseRepository):
             SELECT
                 teacher.id AS teacher_id,
                 teacher.name, teacher.bio, teacher.is_active,
+                teacher.sort_order AS teacher_sort_order,
                 phototeacher.id AS photo_id,
                 phototeacher.url, phototeacher.sort_order
             FROM teacher
             LEFT JOIN phototeacher ON phototeacher.teacher_id = teacher.id
-            ORDER BY teacher.id, phototeacher.sort_order
+            ORDER BY teacher.sort_order, teacher.id, phototeacher.sort_order
             """
+        )
+
+    async def reorder(self, items: list[dict]) -> None:
+        await self.execute_many(
+            "UPDATE teacher SET sort_order = $1 WHERE id = $2",
+            [(item["sort_order"], item["id"]) for item in items]
         )
 
     async def get_by_id(self, teacher_id: int) -> list[asyncpg.Record]:
@@ -40,6 +47,7 @@ class TeacherRepository(BaseRepository):
             SELECT
                 teacher.id AS teacher_id,
                 teacher.name, teacher.bio, teacher.is_active,
+                teacher.sort_order AS teacher_sort_order,
                 phototeacher.id AS photo_id,
                 phototeacher.url, phototeacher.sort_order
             FROM teacher
