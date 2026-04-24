@@ -113,7 +113,9 @@ export function renderNav(adminLinks = false) {
     const nav = document.getElementById("nav");
     if (nav) {
         nav.innerHTML = `
-            <a class="nav-brand" href="${root}index.html">78<span> DANCE</span></a>
+            <a class="nav-brand" href="${root}index.html">
+                <img src="${root}images/logo_78.jpg" alt="Семь-Восемь" class="nav-logo">
+            </a>
             <div class="nav-links">
                 ${publicLinks}
                 ${userLinks}

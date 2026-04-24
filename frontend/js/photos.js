@@ -12,7 +12,7 @@ export function buildPhotoGrid(photos, entityId, delFn) {
         <div class="photo-grid" data-id="${entityId}">
             ${sorted.map(p => `
                 <div class="photo-thumb" draggable="true" data-photo-id="${p.id}">
-                    <img src="${p.url}" onerror="this.style.background='var(--card2)';this.removeAttribute('src')">
+                    <img src="${p.url}" onerror="this.style.background='var(--card)';this.removeAttribute('src')">
                     <button class="photo-del" onclick="${delFn}(${p.id})" title="Удалить">×</button>
                     <span class="photo-order"></span>
                 </div>

@@ -1,14 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&display=swap');
 
 :root {
-    --red:    #E8003D;
-    --orange: #FF6B00;
-    --gold:   #FFB800;
-    --black:  #0A0A0A;
-    --dark:   #111111;
-    --card:   #1A1A1A;
-    --white:  #F5F0E8;
-    --muted:  #888888;
+    --red:    #7B5EA7;
+    --gold:   #C4A870;
+    --black:  #0C0A1A;
+    --card:   #1E1A35;
+    --muted:  #8A7A9A;
+    --border: rgba(255,255,255,0.08);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -16,7 +14,7 @@
 body {
     font-family: 'Montserrat', system-ui, sans-serif;
     background: var(--black);
-    color: var(--white);
+    color: var(--gold);
     min-height: 100vh;
     display: flex;
     flex-direction: column;

@@ -27,8 +27,8 @@
             content: '';
             position: absolute; inset: 38%;
             border-radius: 50%;
-            background: var(--orange);
-            box-shadow: 0 0 16px rgba(255,107,0,.6);
+            background: var(--red);
+            box-shadow: 0 0 16px rgba(123,94,167,.6);
         }
         @keyframes spin {
             from { transform: rotate(0deg); }
@@ -36,7 +36,7 @@
         }
 
         .error-code {
-            background: linear-gradient(135deg, var(--orange), var(--gold));
+            background: linear-gradient(135deg, var(--red), var(--gold));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
@@ -59,7 +59,7 @@
         }
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--orange), var(--gold));
+            background: linear-gradient(90deg, var(--red), var(--gold));
             animation: loading 3s ease-in-out infinite;
             width: 0;
         }
@@ -72,12 +72,12 @@
 
         .btn-home {
             background: transparent;
-            color: var(--orange);
-            border: 1px solid rgba(255,107,0,.4);
+            color: var(--red);
+            border: 1px solid rgba(123,94,167,.4);
         }
         .btn-home:hover {
-            background: var(--orange); color: #fff;
-            border-color: var(--orange);
+            background: var(--red); color: #fff;
+            border-color: var(--red);
         }
 
         .dots {
@@ -86,7 +86,7 @@
         }
         .dots span {
             width: 5px; height: 5px; border-radius: 50%;
-            background: var(--orange); display: inline-block;
+            background: var(--red); display: inline-block;
             animation: blink 1.2s infinite;
         }
         .dots span:nth-child(2) { animation-delay: .2s; }

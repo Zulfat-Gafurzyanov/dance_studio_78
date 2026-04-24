@@ -1,16 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&display=swap');
 
 :root {
-    --red:    #E8003D;
-    --orange: #FF6B00;
-    --gold:   #FFB800;
-    --black:  #0A0A0A;
-    --dark:   #111111;
-    --card:   #1A1A1A;
-    --card2:  #222222;
-    --white:  #F5F0E8;
-    --muted:  #888888;
-    --border: rgba(255,255,255,0.07);
+    --red:    #7B5EA7;
+    --gold:   #C4A870;
+    --black:  #0C0A1A;
+    --card:   #1E1A35;
+    --muted:  #8A7A9A;
+    --border: rgba(255,255,255,0.08);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -20,7 +16,7 @@ html { scroll-behavior: smooth; }
 body {
     font-family: 'Montserrat', system-ui, sans-serif;
     background: var(--black);
-    color: var(--white);
+    color: var(--gold);
     min-height: 100vh;
     font-size: 15px;
     line-height: 1.6;
@@ -52,6 +48,7 @@ body {
 }
 
 .nav-brand span { color: var(--red); }
+.nav-logo { height: 40px; width: auto; display: block; }
 
 .nav-links {
     display: flex;
@@ -82,7 +79,7 @@ body {
     border: 1px solid rgba(232,0,61,0.25);
 }
 .nav-links a#nav-logout:hover {
-    color: var(--white);
+    color: var(--gold);
     background: var(--red);
     border-color: var(--red);
 }
@@ -96,7 +93,7 @@ body {
 
 .admin-sidebar {
     width: 220px;
-    background: var(--dark);
+    background: var(--card);
     border-right: 1px solid var(--border);
     padding: 32px 0;
     flex-shrink: 0;
@@ -126,7 +123,7 @@ body {
 
 .admin-sidebar a:hover,
 .admin-sidebar a.active {
-    color: var(--white);
+    color: var(--gold);
     background: rgba(255,255,255,0.04);
     border-left-color: var(--red);
 }
@@ -148,7 +145,7 @@ h1 {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 40px;
     letter-spacing: 3px;
-    color: var(--white);
+    color: var(--gold);
     margin-bottom: 28px;
 }
 
@@ -156,7 +153,7 @@ h2 {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     letter-spacing: 2px;
-    color: var(--white);
+    color: var(--gold);
     margin-bottom: 20px;
 }
 
@@ -183,7 +180,7 @@ h3 {
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--red), var(--orange));
+    background: linear-gradient(90deg, var(--red), var(--gold));
     opacity: 0;
     transition: opacity 0.2s;
 }
@@ -212,9 +209,9 @@ label {
 input, select, textarea {
     width: 100%;
     padding: 10px 14px;
-    background: var(--card2);
+    background: var(--card);
     border: 1px solid rgba(255,255,255,0.1);
-    color: var(--white);
+    color: var(--gold);
     font-family: 'Montserrat', sans-serif;
     font-size: 14px;
     outline: none;
@@ -232,7 +229,7 @@ textarea {
     resize: vertical;
 }
 
-select option { background: var(--card2); }
+select option { background: var(--card); }
 
 /* ── Buttons ─────────────────────────────────────── */
 
@@ -253,7 +250,7 @@ select option { background: var(--card2); }
 .btn:hover { transform: translateY(-1px); }
 
 .btn-primary   { background: var(--red); color: #fff; }
-.btn-primary:hover { background: var(--orange); }
+.btn-primary:hover { background: var(--red); }
 
 .btn-danger    { background: rgba(232,0,61,0.15); color: var(--red); border: 1px solid rgba(232,0,61,0.3); }
 .btn-danger:hover { background: var(--red); color: #fff; }
@@ -262,7 +259,7 @@ select option { background: var(--card2); }
 .btn-success:hover { background: #2ecc71; color: #fff; }
 
 .btn-secondary { background: rgba(255,255,255,0.07); color: rgba(245,240,232,0.7); border: 1px solid var(--border); }
-.btn-secondary:hover { background: rgba(255,255,255,0.12); color: var(--white); }
+.btn-secondary:hover { background: rgba(255,255,255,0.12); color: var(--gold); }
 
 .btn-sm { padding: 6px 14px; font-size: 10px; }
 
@@ -361,7 +358,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 .item-card {
     border: 1px solid var(--border);
     padding: 18px;
-    background: var(--card2);
+    background: var(--card);
     position: relative;
     transition: border-color 0.2s;
 }
@@ -373,7 +370,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     position: absolute;
     top: 0; left: 0; bottom: 0;
     width: 3px;
-    background: linear-gradient(180deg, var(--red), var(--orange));
+    background: linear-gradient(180deg, var(--red), var(--gold));
 }
 
 .item-card-header {
@@ -389,7 +386,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 0.5px;
-    color: var(--white);
+    color: var(--gold);
 }
 
 .item-card p {
@@ -420,7 +417,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 }
 
 .photo-chip a { color: var(--gold); text-decoration: none; }
-.photo-chip a:hover { color: var(--orange); }
+.photo-chip a:hover { color: var(--red); }
 .photo-chip button {
     background: none;
     border: none;
@@ -491,8 +488,8 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     transition: all 0.15s;
 }
 
-.tab:hover { color: var(--white); }
-.tab.active { color: var(--white); border-bottom-color: var(--red); }
+.tab:hover { color: var(--gold); }
+.tab.active { color: var(--gold); border-bottom-color: var(--red); }
 
 /* ── Public cards grid ───────────────────────────── */
 
@@ -520,14 +517,14 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 2px;
-    background: linear-gradient(90deg, var(--red), var(--orange), var(--gold));
+    background: linear-gradient(90deg, var(--red), var(--gold));
 }
 
 .pub-card h3 {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px;
     letter-spacing: 2px;
-    color: var(--white);
+    color: var(--gold);
     margin-bottom: 8px;
 }
 
@@ -555,7 +552,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     transition: all 0.2s;
 }
 
-.tab-btn:hover { color: var(--white); border-color: rgba(255,255,255,0.2); }
+.tab-btn:hover { color: var(--gold); border-color: rgba(255,255,255,0.2); }
 
 .tab-btn.active {
     background: var(--red);
@@ -586,7 +583,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     height: 100%;
     object-fit: cover;
     display: block;
-    background: var(--card2);
+    background: var(--card);
 }
 
 .photo-thumb.dragging  { opacity: 0.4; }
@@ -692,7 +689,7 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 .confirm-title {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 22px; letter-spacing: 2px;
-    color: var(--white); margin-bottom: 8px;
+    color: var(--gold); margin-bottom: 8px;
 }
 .confirm-text {
     font-size: 13px; color: var(--muted);
