@@ -161,9 +161,14 @@
 }
 .dynamic-grid .dyn-card {
     flex: 0 0 calc(33.333% - 19px);
+    max-width: 360px;
 }
 .dynamic-grid.cols-2 .dyn-card {
     flex: 0 0 calc(50% - 14px);
+    max-width: 420px;
+}
+.dyn-card .carousel {
+    max-height: 420px;
 }
 .dyn-card {
     background: var(--card);
@@ -181,7 +186,7 @@
     font-family: 'Bebas Neue', sans-serif;
     font-size: 26px; letter-spacing: 2px; color: var(--gold); margin-bottom: 8px;
 }
-.dyn-card-desc { font-size: 13px; color: rgba(26,21,18,.6); line-height: 1.7; }
+.dyn-card-desc { font-size: 15px; color: var(--muted); line-height: 1.8; }
 
 /* ── Carousel ── */
 .carousel {
