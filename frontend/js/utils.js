@@ -28,17 +28,17 @@ export function isAdmin() {
 
 export function requireAuth() {
     if (!isLoggedIn()) {
-        window.location.href = rootPath() + "auth.html";
+        window.location.href = rootPath() + "auth";
     }
 }
 
 export function requireAdmin() {
     if (!isLoggedIn()) {
-        window.location.href = rootPath() + "auth.html";
+        window.location.href = rootPath() + "auth";
         return;
     }
     if (!isAdmin()) {
-        window.location.href = rootPath() + "errors/403.html";
+        window.location.href = rootPath() + "errors/403";
         return;
     }
     document.body.style.visibility = "visible";
@@ -91,29 +91,29 @@ export function renderNav(adminLinks = false) {
     const admin = isAdmin();
 
     const publicLinks = `
-        <a href="${root}index.html">Главная</a>
+        <a href="${root}">Главная</a>
     `;
 
     const userLinks = logged ? `
-        <a href="${root}profile.html">Профиль</a>
-        ${admin ? `<a href="${root}admin/users.html">Админка</a>` : ""}
+        <a href="${root}profile">Профиль</a>
+        ${admin ? `<a href="${root}admin/users">Админка</a>` : ""}
         <a href="#" id="nav-logout">Выйти</a>
     ` : `
-        <a href="${root}auth.html">Войти</a>
+        <a href="${root}auth">Войти</a>
     `;
 
     const adminSidebar = adminLinks && admin ? `
         <div class="admin-sidebar-links">
-            <a href="${root}admin/users.html">Пользователи</a>
-            <a href="${root}admin/styles.html">Стили</a>
-            <a href="${root}admin/teachers.html">Преподаватели</a>
+            <a href="${root}admin/users">Пользователи</a>
+            <a href="${root}admin/styles">Стили</a>
+            <a href="${root}admin/teachers">Преподаватели</a>
         </div>
     ` : "";
 
     const nav = document.getElementById("nav");
     if (nav) {
         nav.innerHTML = `
-            <a class="nav-brand" href="${root}index.html">
+            <a class="nav-brand" href="${root}">
                 <img src="${root}images/logo_78.png" alt="Семь-Восемь" class="nav-logo">
             </a>
             <div class="nav-links">
@@ -128,12 +128,12 @@ export function renderNav(adminLinks = false) {
             logoutBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 clearTokens();
-                window.location.href = root + "auth.html";
+                window.location.href = root + "auth";
             });
         }
 
         // Highlight active link
-        const current = window.location.pathname.split("/").pop() || "index.html";
+        const current = window.location.pathname.split("/").pop() || "index";
         nav.querySelectorAll("a").forEach(a => {
             if (a.href.endsWith(current)) a.classList.add("active");
         });

@@ -13,11 +13,11 @@
 <div class="admin-layout">
     <aside class="admin-sidebar">
         <h3>Управление</h3>
-        <a href="users.html">Пользователи</a>
-        <a href="styles.html">Стили</a>
-        <a href="teachers.html">Преподаватели</a>
-        <a href="prices.html">Цены</a>
-        <a href="studio.html">Студия</a>
+        <a href="users">Пользователи</a>
+        <a href="styles">Стили</a>
+        <a href="teachers">Преподаватели</a>
+        <a href="prices">Цены</a>
+        <a href="studio">Студия</a>
     </aside>
 
     <div class="admin-content">
@@ -75,7 +75,7 @@ hideUntilReady();
 requireAdmin();
 renderNav();
 
-document.querySelector('.admin-sidebar a[href="studio.html"]').classList.add("active");
+document.querySelector('.admin-sidebar a[href="studio"]').classList.add("active");
 
 const content = document.querySelector(".admin-content");
 

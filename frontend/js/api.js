@@ -25,22 +25,22 @@ async function request(method, path, body = null, auth = true) {
     try {
         res = await doRequest(method, path, body, auth ? getToken() : null);
     } catch {
-        window.location.href = errorsPath() + "503.html";
+        window.location.href = errorsPath() + "503";
         return;
     }
 
     if (res.status === 204) return null;
 
-    if (res.status === 403) { window.location.href = errorsPath() + "403.html"; return; }
-    if (res.status === 500) { window.location.href = errorsPath() + "500.html"; return; }
-    if (res.status === 503) { window.location.href = errorsPath() + "503.html"; return; }
+    if (res.status === 403) { window.location.href = errorsPath() + "403"; return; }
+    if (res.status === 500) { window.location.href = errorsPath() + "500"; return; }
+    if (res.status === 503) { window.location.href = errorsPath() + "503"; return; }
 
     // Автоматический рефреш при истёкшем access token
     if (res.status === 401 && auth) {
         const refreshToken = localStorage.getItem("refresh_token");
         if (!refreshToken) {
             localStorage.removeItem("access_token");
-            window.location.href = (window.location.pathname.includes("/admin/") ? "../" : "./") + "auth.html";
+            window.location.href = (window.location.pathname.includes("/admin/") ? "../" : "./") + "auth";
             return;
         }
         try {
@@ -59,7 +59,7 @@ async function request(method, path, body = null, auth = true) {
         } catch {
             localStorage.removeItem("access_token");
             localStorage.removeItem("refresh_token");
-            window.location.href = (window.location.pathname.includes("/admin/") ? "../" : "./") + "auth.html";
+            window.location.href = (window.location.pathname.includes("/admin/") ? "../" : "./") + "auth";
             return;
         }
     }

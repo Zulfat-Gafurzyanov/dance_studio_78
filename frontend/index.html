@@ -210,8 +210,8 @@ api.getStudioInfo().then(s => {
 const authEl = document.getElementById("nav-auth");
 if (isLoggedIn()) {
     authEl.innerHTML = `
-        ${isAdmin() ? `<a href="admin/users.html">Админка</a>` : ""}
-        <a href="profile.html">Профиль</a>
+        ${isAdmin() ? `<a href="admin/users">Админка</a>` : ""}
+        <a href="profile">Профиль</a>
         <a href="#" id="nav-logout" class="btn-nav">Выйти</a>
     `;
     document.getElementById("nav-logout").addEventListener("click", e => {
@@ -220,7 +220,7 @@ if (isLoggedIn()) {
         window.location.reload();
     });
 } else {
-    authEl.innerHTML = `<a href="auth.html" class="btn-nav">Войти</a>`;
+    authEl.innerHTML = `<a href="auth" class="btn-nav">Войти</a>`;
 }
 
 // ── Sticky nav ────────────────────────────────────────

@@ -93,7 +93,7 @@ document.getElementById("btn-delete").addEventListener("click", async () => {
     try {
         await api.deleteMe();
         clearTokens();
-        window.location.href = "auth.html";
+        window.location.href = "auth";
     } catch (err) {
         showAlert(container, err.message);
     }
