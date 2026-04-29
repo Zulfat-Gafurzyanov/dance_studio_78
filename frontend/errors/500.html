@@ -6,20 +6,30 @@
     <title>500 — Ошибка сервера</title>
     <link rel="stylesheet" href="/errors/errors.css">
     <style>
-        /* Сцена рухнула */
         body {
             background: radial-gradient(ellipse 70% 70% at 50% 30%,
-                #0f0800, var(--black));
+                #110d24, var(--black));
         }
 
         .stage-light {
             position: fixed; z-index: 0; pointer-events: none;
             top: -80px; left: 50%; transform: translateX(-50%);
             width: 3px; height: 45vh;
-            background: linear-gradient(to bottom, rgba(255,184,0,.7), transparent);
-            box-shadow: 0 0 60px 40px rgba(255,184,0,.06);
+            background: linear-gradient(to bottom, var(--gold), transparent);
+            box-shadow: 0 0 60px 40px rgba(196,168,112,.06);
             animation: flicker 0.15s infinite;
         }
+
+        .stage-cone {
+            position: fixed; z-index: 0; pointer-events: none;
+            top: 0; left: 50%; transform: translateX(-50%);
+            width: 0; height: 0;
+            border-left: 15vw solid transparent;
+            border-right: 15vw solid transparent;
+            border-top: 45vh solid rgba(196,168,112,.04);
+            animation: flicker 0.15s infinite;
+        }
+
         @keyframes flicker {
             0%   { opacity: 1; }
             15%  { opacity: .6; }
@@ -32,33 +42,23 @@
             95%  { opacity: 1; }
         }
 
-        .stage-cone {
-            position: fixed; z-index: 0; pointer-events: none;
-            top: 0; left: 50%; transform: translateX(-50%);
-            width: 0; height: 0;
-            border-left: 15vw solid transparent;
-            border-right: 15vw solid transparent;
-            border-top: 45vh solid rgba(255,184,0,.04);
-            animation: flicker 0.15s infinite;
-        }
-
         .error-code {
             color: var(--gold);
-            text-shadow: 0 0 80px rgba(255,184,0,.3);
+            text-shadow: 0 0 80px rgba(196,168,112,.3);
             animation: flicker 0.15s infinite;
         }
 
-        .microphone {
+        .shoe {
             font-size: 60px; margin-bottom: 12px; display: block;
-            animation: fall 1s cubic-bezier(.36,.07,.19,.97) both;
-            transform-origin: top center;
+            animation: stumble 1s cubic-bezier(.36,.07,.19,.97) both;
+            transform-origin: bottom center;
         }
-        @keyframes fall {
-            0%   { transform: rotate(0deg); }
-            30%  { transform: rotate(-20deg); }
-            60%  { transform: rotate(80deg); }
-            80%  { transform: rotate(65deg); }
-            100% { transform: rotate(70deg); }
+        @keyframes stumble {
+            0%   { transform: rotate(0deg) translateY(0); }
+            25%  { transform: rotate(-15deg) translateY(-6px); }
+            50%  { transform: rotate(10deg) translateY(4px); }
+            75%  { transform: rotate(-5deg) translateY(-2px); }
+            100% { transform: rotate(8deg) translateY(0); }
         }
 
         .error-label { color: var(--gold); opacity: .6; }
@@ -84,12 +84,12 @@
     <div class="bg-noise"></div>
 
     <div class="content">
-        <span class="microphone">🎤</span>
+        <span class="shoe">🩰</span>
         <div class="error-label">Ошибка сервера</div>
         <div class="error-code">500</div>
         <div class="crack"></div>
-        <div class="error-title">Mic Drop. Сервер упал.</div>
-        <p class="error-desc">Что-то пошло не так за кулисами. Мы уже разбираемся. Попробуй чуть позже — шоу должно продолжаться.</p>
+        <div class="error-title">Что-то пошло не так</div>
+        <p class="error-desc">На нашей стороне возникла ошибка. Мы уже разбираемся. Вернитесь чуть позже, чтобы продолжить запись на занятия.</p>
         <a href="../" class="btn-home">← На главную</a>
     </div>
 </body>
