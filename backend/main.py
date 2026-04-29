@@ -3,7 +3,6 @@ from contextlib import asynccontextmanager
 import redis.asyncio as redis
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from prometheus_client import make_asgi_app
 
 from src.api import deps
 from src.api.v1.router import v1_router
@@ -19,7 +18,7 @@ from src.utils.logging import setup_logging
 async def lifespan(app: FastAPI):
     # ── Startup ──────────────────────────────────────
     setup_logging()
-    load_keys()
+    load_keys()  # загружает RSA/JWT ключи для подписи токенов
     await init_db_pool()
 
     pool = redis.ConnectionPool.from_url(settings.REDIS_URL)
@@ -57,7 +56,3 @@ app.add_middleware(LoggingMiddleware)
 # ── Routes ───────────────────────────────────────────────────
 
 app.include_router(v1_router, prefix="/api")
-
-if settings.ENABLE_METRICS:
-    metrics_app = make_asgi_app()
-    app.mount("/metrics", metrics_app)
