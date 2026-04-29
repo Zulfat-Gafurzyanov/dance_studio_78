@@ -212,13 +212,7 @@ if (isLoggedIn()) {
     authEl.innerHTML = `
         ${isAdmin() ? `<a href="admin/users">Админка</a>` : ""}
         <a href="profile">Профиль</a>
-        <a href="#" id="nav-logout" class="btn-nav">Выйти</a>
     `;
-    document.getElementById("nav-logout").addEventListener("click", e => {
-        e.preventDefault();
-        clearTokens();
-        window.location.reload();
-    });
 } else {
     authEl.innerHTML = `<a href="auth" class="btn-nav">Войти</a>`;
 }
