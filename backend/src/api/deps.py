@@ -11,6 +11,7 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from src.core.security import decode_access_token
 from src.db import pool as db_pool_module
 from src.repository.price import PriceRepository
+from src.repository.schedule import ScheduleRepository
 from src.repository.studioinfo import StudioInfoRepository
 from src.repository.style import StyleRepository
 from src.repository.teacher import TeacherRepository
@@ -18,6 +19,7 @@ from src.repository.user import UserRepository
 from src.service.admin import AdminService
 from src.service.auth import AuthService
 from src.service.price import PriceService
+from src.service.schedule import ScheduleService
 from src.service.studioinfo import StudioInfoService
 from src.service.style import StyleService
 from src.service.teacher import TeacherService
@@ -150,3 +152,15 @@ async def get_studioinfo_service(
     ],
 ) -> StudioInfoService:
     return StudioInfoService(repo)
+
+
+async def get_schedule_repository(
+    conn: Annotated[asyncpg.Connection, Depends(get_db)],
+) -> ScheduleRepository:
+    return ScheduleRepository(conn)
+
+
+async def get_schedule_service(
+    repo: Annotated[ScheduleRepository, Depends(get_schedule_repository)],
+) -> ScheduleService:
+    return ScheduleService(repo)
