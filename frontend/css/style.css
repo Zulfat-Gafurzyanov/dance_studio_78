@@ -30,6 +30,7 @@ body {
     padding: 0 40px;
     display: flex;
     align-items: center;
+    position: relative;
     gap: 32px;
     height: 60px;
     position: sticky;
@@ -49,15 +50,22 @@ body {
 
 .nav-brand span { color: var(--red); }
 .nav-logo { height: 40px; width: auto; display: block; }
-
-.nav-links {
-    display: flex;
-    gap: 4px;
-    flex: 1;
-    align-items: center;
+.nav-admin-zone {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem;
+    letter-spacing: 0.2em; color: var(--red);
+    position: absolute; left: 50%; transform: translateX(-50%);
+    pointer-events: none;
 }
 
-.nav-links a {
+.nav-links, .nav-auth, .nav-section-links, .nav-left-links {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+.nav-section-links { flex: 1; justify-content: center; }
+.nav-auth { margin-left: auto; }
+
+.nav-links a, .nav-auth a, .nav-section-links a, .nav-left-links a {
     color: rgba(245,240,232,0.55);
     text-decoration: none;
     padding: 6px 14px;
@@ -68,8 +76,10 @@ body {
     transition: color 0.2s;
 }
 
-.nav-links a:hover,
-.nav-links a.active {
+.nav-links a:hover, .nav-links a.active,
+.nav-auth a:hover, .nav-auth a.active,
+.nav-section-links a:hover, .nav-section-links a.active,
+.nav-left-links a:hover, .nav-left-links a.active {
     color: var(--gold);
 }
 
@@ -131,6 +141,11 @@ body {
 .admin-content {
     flex: 1;
     padding: 40px;
+}
+
+.admin-toolbar {
+    display: flex; align-items: center; gap: 0.75rem;
+    flex-wrap: nowrap; margin-bottom: 1.25rem;
 }
 
 /* ── Page content ────────────────────────────────── */
@@ -660,6 +675,22 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     margin-bottom: 8px;
 }
 
+.section-label {
+    font-size: 11px; font-weight: 700; letter-spacing: 4px;
+    text-transform: uppercase; color: var(--red); margin-bottom: 16px;
+}
+.section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 5vw, 64px);
+    line-height: 1; letter-spacing: 2px; margin-bottom: 20px;
+    color: var(--gold);
+}
+.divider {
+    width: 60px; height: 3px;
+    background: linear-gradient(90deg, var(--red), var(--gold));
+    margin-bottom: 32px;
+}
+
 /* ── Confirm modal ───────────────────────────────── */
 
 .confirm-overlay {
@@ -710,6 +741,24 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     text-transform: uppercase; color: var(--muted); min-width: 100px;
 }
 
+/* ===== ADMIN TABS ===== */
+.admin-tabs {
+    display: flex; gap: 4px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 50px; padding: 4px;
+}
+.admin-tab {
+    background: none; border: none;
+    color: var(--muted);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.95rem; letter-spacing: 0.12em;
+    padding: 0.35rem 1.6rem; border-radius: 50px;
+    cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+.admin-tab.active { background: var(--red); color: #fff; }
+.admin-tab:hover:not(.active) { color: var(--gold); background: rgba(255,255,255,0.06); }
+
 /* ===== SCHEDULE ===== */
 .schedule-nav {
     display: flex; align-items: center; justify-content: space-between;
@@ -735,19 +784,33 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 }
 .schedule-day-name {
     font-family: 'Bebas Neue', sans-serif; font-size: 1rem;
-    color: var(--gold); letter-spacing: 0.1em;
+    color: rgba(255,255,255,0.4); letter-spacing: 0.1em;
 }
-.schedule-day--today .schedule-day-name { color: var(--red); }
+.schedule-day--today .schedule-day-name { color: var(--gold); }
 .schedule-day-date { font-size: 0.7rem; color: var(--muted); }
 .schedule-day-events { padding: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; }
 .schedule-empty { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 1rem 0; }
 .schedule-event-card {
     background: rgba(255,255,255,0.03); border: 1px solid var(--border);
     border-left: 3px solid var(--red); border-radius: 5px;
-    padding: 0.5rem 0.6rem; cursor: pointer;
+    padding: 0.5rem 0.6rem;
     transition: background 0.18s, border-color 0.18s;
 }
-.schedule-event-card:hover { background: rgba(123,94,167,0.15); border-color: var(--red); }
+.schedule-event-card--substitute { border-left-color: var(--gold); }
+.schedule-event-teacher-sub { font-size: 0.7rem; color: var(--muted); margin-top: 1px; }
+.schedule-event-sub-badge {
+    display: inline-block; font-size: 0.55rem; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+    background: rgba(196,168,112,0.15); color: var(--gold);
+    padding: 1px 5px; border-radius: 3px; margin-left: 4px; vertical-align: middle;
+}
+.schedule-event-enrolled {
+    font-size: 0.7rem; color: #81c784; margin-top: 6px; margin-bottom: 2px;
+}
+.schedule-event-btn {
+    display: block; width: 100%; margin-top: 6px;
+    padding: 5px 0; font-size: 0.7rem; text-align: center;
+}
 .schedule-event-card--cancelled { border-left-color: var(--muted); opacity: 0.55; }
 .schedule-event-time {
     font-family: 'Bebas Neue', sans-serif; font-size: 1.05rem;
@@ -796,6 +859,13 @@ tr:hover td { background: rgba(255,255,255,0.025); }
 .muted { color: var(--muted); }
 
 /* Schedule admin */
+/* Admin event card actions */
+.schedule-event-card-actions {
+    display: flex; gap: 4px; margin-top: 6px;
+    padding-top: 6px; border-top: 1px solid var(--border);
+}
+.btn:disabled { opacity: 0.35; cursor: not-allowed; pointer-events: none; }
+
 .schedule-admin-event {
     display: flex; align-items: center; justify-content: space-between;
     background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--red);
