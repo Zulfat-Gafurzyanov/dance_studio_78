@@ -18,7 +18,7 @@
         <a href="#styles">Направления</a>
         <a href="#teachers">Преподаватели</a>
         <a href="#prices">Цены</a>
-        <a href="#booking">Запись</a>
+        <a href="schedule">Расписание</a>
         <a href="#contacts">Контакты</a>
     </div>
     <div class="nav-auth" id="nav-auth"></div>
@@ -174,7 +174,7 @@
 
 <script type="module">
 import { api } from "./js/api.js";
-import { isLoggedIn, isAdmin, clearTokens } from "./js/utils.js";
+import { isLoggedIn, isAdmin } from "./js/utils.js";
 
 // ── Studio info ───────────────────────────────────────
 function roundStudents(n) {

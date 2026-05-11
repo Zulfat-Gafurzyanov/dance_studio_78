@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание — Админ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body style="visibility:hidden">
+
+<nav id="nav"></nav>
+
+<div class="admin-layout">
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
+<main class="admin-main">
+
+    <div class="admin-page-header">
+        <h1 class="admin-title">Расписание</h1>
+        <div class="admin-tabs" id="tabs">
+            <button class="admin-tab active" data-tab="events">Занятия</button>
+            <button class="admin-tab" data-tab="templates">Шаблоны</button>
+        </div>
+    </div>
+
+    <!-- ===== ЗАНЯТИЯ ===== -->
+    <div id="tab-events">
+        <div class="admin-toolbar">
+            <div class="schedule-nav" style="flex:1">
+                <button class="btn btn-secondary" id="prev-week">&#8592;</button>
+                <span class="schedule-week-label" id="week-label"></span>
+                <button class="btn btn-secondary" id="next-week">&#8594;</button>
+            </div>
+            <button class="btn btn-primary" id="create-event-btn">+ Занятие</button>
+        </div>
+        <div id="events-alert"></div>
+        <div id="events-list"></div>
+    </div>
+
+    <!-- ===== ШАБЛОНЫ ===== -->
+    <div id="tab-templates" style="display:none">
+        <div class="admin-toolbar">
+            <button class="btn btn-primary" id="create-tpl-btn">+ Шаблон</button>
+        </div>
+        <div id="templates-alert"></div>
+        <div id="templates-list"></div>
+    </div>
+
+</main>
+</div>
+
+<!-- ===== Модалка: занятие ===== -->
+<div class="modal-overlay hidden" id="event-modal">
+    <div class="modal-box" style="max-width:520px">
+        <button class="modal-close" id="event-modal-close">✕</button>
+        <div class="modal-title" id="event-modal-title">Занятие</div>
+        <div id="event-modal-alert"></div>
+        <form id="event-form">
+            <div class="form-group">
+                <label class="form-label">Направление</label>
+                <select class="form-input" name="style_id" required id="ev-style"></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Преподаватель</label>
+                <select class="form-input" name="teacher_id" required id="ev-teacher"></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Замена преподавателя (необязательно)</label>
+                <select class="form-input" name="substitute_teacher_id" id="ev-sub">
+                    <option value="">— нет замены —</option>
+                </select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+                <div class="form-group">
+                    <label class="form-label">Дата</label>
+                    <input class="form-input" type="date" name="event_date" required id="ev-date">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Начало</label>
+                    <input class="form-input" type="time" name="time_start" required id="ev-time">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Длительность, мин</label>
+                    <input class="form-input" type="number" name="duration_minutes" value="60" min="15" max="240" id="ev-dur">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Мест максимум</label>
+                    <input class="form-input" type="number" name="max_students" value="8" min="1" max="50" id="ev-max">
+                </div>
+            </div>
+            <div class="form-group" id="ev-status-wrap" style="display:none">
+                <label class="form-label">Статус</label>
+                <select class="form-input" name="status" id="ev-status">
+                    <option value="запланировано">Запланировано</option>
+                    <option value="отменено">Отменено</option>
+                </select>
+            </div>
+            <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem">
+                <button type="button" class="btn btn-secondary" id="event-modal-cancel">Отмена</button>
+                <button type="submit" class="btn btn-primary" id="event-submit-btn">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ===== Модалка: шаблон ===== -->
+<div class="modal-overlay hidden" id="tpl-modal">
+    <div class="modal-box" style="max-width:520px">
+        <button class="modal-close" id="tpl-modal-close">✕</button>
+        <div class="modal-title" id="tpl-modal-title">Шаблон</div>
+        <div id="tpl-modal-alert"></div>
+        <form id="tpl-form">
+            <div class="form-group">
+                <label class="form-label">Направление</label>
+                <select class="form-input" name="style_id" required id="tpl-style"></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Преподаватель</label>
+                <select class="form-input" name="teacher_id" required id="tpl-teacher"></select>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+                <div class="form-group">
+                    <label class="form-label">День недели</label>
+                    <select class="form-input" name="day_of_week" required id="tpl-day">
+                        <option value="0">Понедельник</option>
+                        <option value="1">Вторник</option>
+                        <option value="2">Среда</option>
+                        <option value="3">Четверг</option>
+                        <option value="4">Пятница</option>
+                        <option value="5">Суббота</option>
+                        <option value="6">Воскресенье</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Начало</label>
+                    <input class="form-input" type="time" name="time_start" required id="tpl-time">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Длительность, мин</label>
+                    <input class="form-input" type="number" name="duration_minutes" value="60" min="15" max="240">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Мест максимум</label>
+                    <input class="form-input" type="number" name="max_students" value="8" min="1" max="50">
+                </div>
+            </div>
+            <div class="form-group">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
+                    <input type="checkbox" name="is_active" id="tpl-active" checked> Активен
+                </label>
+            </div>
+            <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem">
+                <button type="button" class="btn btn-secondary" id="tpl-modal-cancel">Отмена</button>
+                <button type="submit" class="btn btn-primary">Сохранить</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type="module">
+import { api } from "../js/api.js";
+import { requireAdmin, hideUntilReady, renderNav, renderSidebar, showAlert, showConfirm } from "../js/utils.js";
+
+hideUntilReady();
+requireAdmin();
+renderNav();
+renderSidebar();
+
+const MONTHS_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const DAY_NAMES    = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function toISO(d)       { return d.toISOString().slice(0, 10); }
+function getMonday(d) {
+    const date = new Date(d); const day = date.getDay() || 7;
+    date.setDate(date.getDate() - day + 1); date.setHours(0,0,0,0); return date;
+}
+
+// ── Shared data ──────────────────────────────────────
+let styles = [], teachers = [];
+let currentMonday = getMonday(new Date());
+let weekEvents = [];
+let editingEventId = null;
+let editingTplId   = null;
+
+async function loadShared() {
+    [styles, teachers] = await Promise.all([api.getStyles(), api.getTeachers()]);
+}
+
+function populateSelect(sel, items, valueFn, labelFn, extra = '') {
+    sel.innerHTML = extra + items.map(i =>
+        `<option value="${valueFn(i)}">${labelFn(i)}</option>`).join('');
+}
+
+// ── Tabs ─────────────────────────────────────────────
+document.querySelectorAll('.admin-tab').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.admin-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const tab = btn.dataset.tab;
+        document.getElementById('tab-events').style.display    = tab === 'events'    ? '' : 'none';
+        document.getElementById('tab-templates').style.display = tab === 'templates' ? '' : 'none';
+        if (tab === 'templates') loadTemplates();
+    });
+});
+
+// ── Week navigation ───────────────────────────────────
+function updateWeekLabel() {
+    const end = addDays(currentMonday, 6);
+    document.getElementById('week-label').textContent =
+        `${currentMonday.getDate()} ${MONTHS_SHORT[currentMonday.getMonth()]} — ` +
+        `${end.getDate()} ${MONTHS_SHORT[end.getMonth()]} ${end.getFullYear()}`;
+}
+
+async function loadWeekEvents() {
+    updateWeekLabel();
+    const from = toISO(currentMonday);
+    const to   = toISO(addDays(currentMonday, 6));
+    try {
+        weekEvents = await api.getEventsAdmin(from, to);
+        renderWeekEvents();
+    } catch (e) {
+        showAlert(document.getElementById('events-alert'), e.message);
+    }
+}
+
+function renderWeekEvents() {
+    const el = document.getElementById('events-list');
+    const byDay = {};
+    for (let i = 0; i < 7; i++) byDay[toISO(addDays(currentMonday, i))] = [];
+    weekEvents.forEach(ev => { if (byDay[ev.event_date]) byDay[ev.event_date].push(ev); });
+
+    el.innerHTML = Object.entries(byDay).map(([date, evs]) => {
+        const d = new Date(date + 'T00:00:00');
+        const dayName = `${DAY_NAMES[d.getDay() === 0 ? 6 : d.getDay()-1]}, ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
+        const sorted  = [...evs].sort((a,b) => a.time_start.localeCompare(b.time_start));
+        return `<div class="schedule-day-group">
+            <div class="schedule-day-group-title">${dayName}</div>
+            ${sorted.length ? sorted.map(ev => `
+                <div class="schedule-admin-event${ev.status === 'отменено' ? ' schedule-admin-event--cancelled' : ''}">
+                    <div class="schedule-admin-event-info">
+                        <div class="schedule-admin-event-title">${ev.time_start.slice(0,5)} · ${ev.style_name}</div>
+                        <div class="schedule-admin-event-sub">
+                            ${ev.teacher_name}${ev.substitute_teacher_name ? ` → ${ev.substitute_teacher_name}` : ''}
+                            · ${ev.duration_minutes} мин · ${ev.enrolled_count}/${ev.max_students}
+                            ${ev.status === 'отменено' ? ' · <span style="color:var(--muted)">отменено</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="schedule-admin-event-btns">
+                        <button class="btn btn-secondary btn-sm" onclick="editEvent(${ev.id})">Ред.</button>
+                        <button class="btn btn-danger btn-sm"    onclick="deleteEvent(${ev.id})">Удал.</button>
+                    </div>
+                </div>
+            `).join('') : '<div style="color:var(--muted);font-size:0.8rem;padding:0.25rem 0">Нет занятий</div>'}
+        </div>`;
+    }).join('');
+}
+
+document.getElementById('prev-week').addEventListener('click', () => { currentMonday = addDays(currentMonday, -7); loadWeekEvents(); });
+document.getElementById('next-week').addEventListener('click', () => { currentMonday = addDays(currentMonday,  7); loadWeekEvents(); });
+
+// ── Event modal ───────────────────────────────────────
+function openEventModal(ev = null) {
+    editingEventId = ev?.id ?? null;
+    const isEdit = !!ev;
+    document.getElementById('event-modal-title').textContent = isEdit ? 'Редактировать занятие' : 'Новое занятие';
+    document.getElementById('ev-status-wrap').style.display  = isEdit ? '' : 'none';
+
+    populateSelect(document.getElementById('ev-style'),   styles,   s => s.id, s => s.name);
+    populateSelect(document.getElementById('ev-teacher'), teachers, t => t.id, t => t.name);
+    populateSelect(document.getElementById('ev-sub'),     teachers, t => t.id, t => t.name, '<option value="">— нет замены —</option>');
+
+    if (isEdit) {
+        document.getElementById('ev-style').value   = ev.style_id;
+        document.getElementById('ev-teacher').value = ev.teacher_id;
+        document.getElementById('ev-sub').value     = ev.substitute_teacher_id || '';
+        document.getElementById('ev-date').value    = ev.event_date;
+        document.getElementById('ev-time').value    = ev.time_start.slice(0,5);
+        document.getElementById('ev-dur').value     = ev.duration_minutes;
+        document.getElementById('ev-max').value     = ev.max_students;
+        document.getElementById('ev-status').value  = ev.status;
+    } else {
+        document.getElementById('event-form').reset();
+        document.getElementById('ev-dur').value = 60;
+        document.getElementById('ev-max').value = 8;
+    }
+    document.getElementById('event-modal').classList.remove('hidden');
+}
+
+document.getElementById('event-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('event-submit-btn');
+    btn.disabled = true;
+    const fd = new FormData(e.target);
+
+    try {
+        if (editingEventId) {
+            const data = {};
+            const sub = fd.get('substitute_teacher_id');
+            data.substitute_teacher_id = sub ? +sub : null;
+            data.status            = fd.get('status');
+            data.time_start        = fd.get('time_start');
+            data.duration_minutes  = +fd.get('duration_minutes');
+            data.max_students      = +fd.get('max_students');
+            await api.updateEvent(editingEventId, data);
+        } else {
+            const sub = fd.get('substitute_teacher_id');
+            await api.createEvent({
+                style_id:           +fd.get('style_id'),
+                teacher_id:         +fd.get('teacher_id'),
+                substitute_teacher_id: sub ? +sub : null,
+                event_date:         fd.get('event_date'),
+                time_start:         fd.get('time_start'),
+                duration_minutes:   +fd.get('duration_minutes'),
+                max_students:       +fd.get('max_students'),
+            });
+        }
+        document.getElementById('event-modal').classList.add('hidden');
+        await loadWeekEvents();
+    } catch (err) {
+        showAlert(document.getElementById('event-modal-alert'), err.message);
+    } finally { btn.disabled = false; }
+});
+
+window.editEvent = id => openEventModal(weekEvents.find(e => e.id === id));
+
+window.deleteEvent = async id => {
+    if (!await showConfirm('Удалить занятие? Все записи студентов будут также удалены.', 'Удаление занятия')) return;
+    try { await api.deleteEvent(id); await loadWeekEvents(); }
+    catch (e) { showAlert(document.getElementById('events-alert'), e.message); }
+};
+
+document.getElementById('create-event-btn').addEventListener('click',    () => openEventModal());
+document.getElementById('event-modal-close').addEventListener('click',   () => document.getElementById('event-modal').classList.add('hidden'));
+document.getElementById('event-modal-cancel').addEventListener('click',  () => document.getElementById('event-modal').classList.add('hidden'));
+
+// ── Templates ─────────────────────────────────────────
+async function loadTemplates() {
+    try {
+        const templates = await api.getTemplates();
+        renderTemplates(templates);
+    } catch (e) {
+        showAlert(document.getElementById('templates-alert'), e.message);
+    }
+}
+
+function renderTemplates(templates) {
+    const el = document.getElementById('templates-list');
+    if (!templates.length) {
+        el.innerHTML = '<p style="color:var(--muted)">Шаблонов нет</p>';
+        return;
+    }
+    const sorted = [...templates].sort((a,b) => a.day_of_week - b.day_of_week || a.time_start.localeCompare(b.time_start));
+    el.innerHTML = sorted.map(t => `
+        <div class="schedule-admin-event${!t.is_active ? ' schedule-admin-event--cancelled' : ''}">
+            <div class="schedule-admin-event-info">
+                <div class="schedule-admin-event-title">${DAY_NAMES[t.day_of_week]} ${t.time_start.slice(0,5)} · ${t.style_name}</div>
+                <div class="schedule-admin-event-sub">
+                    ${t.teacher_name} · ${t.duration_minutes} мин · макс. ${t.max_students}
+                    ${!t.is_active ? ' · <span style="color:var(--muted)">неактивен</span>' : ''}
+                </div>
+            </div>
+            <div class="schedule-admin-event-btns">
+                <button class="btn btn-secondary btn-sm" onclick="editTemplate(${t.id})">Ред.</button>
+                <button class="btn btn-danger btn-sm"    onclick="deleteTemplate(${t.id})">Удал.</button>
+            </div>
+        </div>
+    `).join('');
+    window._templates = templates;
+}
+
+function openTplModal(tpl = null) {
+    editingTplId = tpl?.id ?? null;
+    document.getElementById('tpl-modal-title').textContent = tpl ? 'Редактировать шаблон' : 'Новый шаблон';
+    populateSelect(document.getElementById('tpl-style'),   styles,   s => s.id, s => s.name);
+    populateSelect(document.getElementById('tpl-teacher'), teachers, t => t.id, t => t.name);
+    if (tpl) {
+        document.getElementById('tpl-style').value   = tpl.style_id;
+        document.getElementById('tpl-teacher').value = tpl.teacher_id;
+        document.getElementById('tpl-day').value     = tpl.day_of_week;
+        document.getElementById('tpl-time').value    = tpl.time_start.slice(0,5);
+        document.getElementById('tpl-form').elements['duration_minutes'].value = tpl.duration_minutes;
+        document.getElementById('tpl-form').elements['max_students'].value     = tpl.max_students;
+        document.getElementById('tpl-active').checked = tpl.is_active;
+    } else {
+        document.getElementById('tpl-form').reset();
+        document.getElementById('tpl-form').elements['duration_minutes'].value = 60;
+        document.getElementById('tpl-form').elements['max_students'].value     = 8;
+        document.getElementById('tpl-active').checked = true;
+    }
+    document.getElementById('tpl-modal').classList.remove('hidden');
+}
+
+document.getElementById('tpl-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    const data = {
+        style_id:         +fd.get('style_id'),
+        teacher_id:       +fd.get('teacher_id'),
+        day_of_week:      +fd.get('day_of_week'),
+        time_start:       fd.get('time_start'),
+        duration_minutes: +fd.get('duration_minutes'),
+        max_students:     +fd.get('max_students'),
+        is_active:        document.getElementById('tpl-active').checked,
+    };
+    try {
+        if (editingTplId) await api.updateTemplate(editingTplId, data);
+        else              await api.createTemplate(data);
+        document.getElementById('tpl-modal').classList.add('hidden');
+        await loadTemplates();
+    } catch (err) {
+        showAlert(document.getElementById('tpl-modal-alert'), err.message);
+    }
+});
+
+window.editTemplate = id => openTplModal(window._templates?.find(t => t.id === id));
+
+window.deleteTemplate = async id => {
+    if (!await showConfirm('Удалить шаблон расписания?', 'Удаление шаблона')) return;
+    try { await api.deleteTemplate(id); await loadTemplates(); }
+    catch (e) { showAlert(document.getElementById('templates-alert'), e.message); }
+};
+
+document.getElementById('create-tpl-btn').addEventListener('click',   () => openTplModal());
+document.getElementById('tpl-modal-close').addEventListener('click',  () => document.getElementById('tpl-modal').classList.add('hidden'));
+document.getElementById('tpl-modal-cancel').addEventListener('click', () => document.getElementById('tpl-modal').classList.add('hidden'));
+
+// ── Init ─────────────────────────────────────────────
+await loadShared();
+await loadWeekEvents();
+</script>
+</body>
+</html>

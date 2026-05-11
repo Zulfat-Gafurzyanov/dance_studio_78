@@ -709,3 +709,108 @@ tr:hover td { background: rgba(255,255,255,0.025); }
     font-size: 11px; font-weight: 700; letter-spacing: 1px;
     text-transform: uppercase; color: var(--muted); min-width: 100px;
 }
+
+/* ===== SCHEDULE ===== */
+.schedule-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    margin: 1.5rem 0 1.25rem; gap: 1rem;
+}
+.schedule-week-label {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem;
+    color: var(--gold); letter-spacing: 0.05em; text-align: center;
+}
+.schedule-grid {
+    display: grid; grid-template-columns: repeat(7, 1fr);
+    gap: 0.6rem; align-items: start;
+}
+.schedule-day {
+    background: var(--card); border-radius: 8px;
+    border: 1px solid var(--border); overflow: hidden;
+}
+.schedule-day--today { border-color: var(--red); }
+.schedule-day-header {
+    padding: 0.5rem 0.5rem 0.4rem; background: rgba(255,255,255,0.03);
+    border-bottom: 1px solid var(--border);
+    display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+.schedule-day-name {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1rem;
+    color: var(--gold); letter-spacing: 0.1em;
+}
+.schedule-day--today .schedule-day-name { color: var(--red); }
+.schedule-day-date { font-size: 0.7rem; color: var(--muted); }
+.schedule-day-events { padding: 0.4rem; display: flex; flex-direction: column; gap: 0.4rem; }
+.schedule-empty { color: var(--muted); font-size: 0.75rem; text-align: center; padding: 1rem 0; }
+.schedule-event-card {
+    background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+    border-left: 3px solid var(--red); border-radius: 5px;
+    padding: 0.5rem 0.6rem; cursor: pointer;
+    transition: background 0.18s, border-color 0.18s;
+}
+.schedule-event-card:hover { background: rgba(123,94,167,0.15); border-color: var(--red); }
+.schedule-event-card--cancelled { border-left-color: var(--muted); opacity: 0.55; }
+.schedule-event-time {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.05rem;
+    color: var(--gold); letter-spacing: 0.04em;
+}
+.schedule-event-style { font-size: 0.8rem; font-weight: 600; color: #fff; margin: 1px 0; }
+.schedule-event-teacher { font-size: 0.7rem; color: var(--muted); }
+.schedule-event-meta { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.35rem; font-size: 0.68rem; color: var(--muted); }
+
+/* Badges */
+.badge {
+    display: inline-block; padding: 2px 6px; border-radius: 4px;
+    font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+}
+.badge-ok   { background: rgba(76,175,80,0.18); color: #81c784; }
+.badge-few  { background: rgba(255,152,0,0.18); color: #ffb74d; }
+.badge-full { background: rgba(244,67,54,0.18); color: #ef9a9a; }
+.badge-cancelled { background: rgba(138,122,154,0.18); color: var(--muted); }
+
+/* Modal */
+.modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.72);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 1000; padding: 1rem;
+}
+.modal-overlay.hidden { display: none; }
+.modal-box {
+    background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+    padding: 2rem; width: 100%; max-width: 460px; position: relative;
+}
+.modal-close {
+    position: absolute; top: 1rem; right: 1rem; background: none; border: none;
+    color: var(--muted); font-size: 1.1rem; cursor: pointer; line-height: 1;
+}
+.modal-close:hover { color: #fff; }
+.modal-tag { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.12em; color: var(--red); margin-bottom: 4px; }
+.modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.7rem; color: var(--gold); margin-bottom: 1.25rem; }
+.modal-rows { display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.5rem; }
+.modal-row {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-size: 0.88rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem;
+}
+.modal-row-label { font-size: 0.75rem; color: var(--muted); }
+.modal-enrolled { color: #81c784; font-size: 0.82rem; margin-bottom: 0.75rem; }
+.modal-actions { display: flex; flex-direction: column; gap: 0.5rem; }
+.muted { color: var(--muted); }
+
+/* Schedule admin */
+.schedule-admin-event {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--card); border: 1px solid var(--border); border-left: 3px solid var(--red);
+    border-radius: 6px; padding: 0.65rem 1rem; margin-bottom: 0.4rem;
+}
+.schedule-admin-event--cancelled { border-left-color: var(--muted); opacity: 0.6; }
+.schedule-admin-event-info { display: flex; flex-direction: column; gap: 2px; }
+.schedule-admin-event-title { font-weight: 600; font-size: 0.9rem; }
+.schedule-admin-event-sub { font-size: 0.75rem; color: var(--muted); }
+.schedule-admin-event-btns { display: flex; gap: 0.4rem; flex-shrink: 0; }
+.schedule-day-group { margin-bottom: 1.5rem; }
+.schedule-day-group-title {
+    font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; color: var(--gold);
+    letter-spacing: 0.08em; margin-bottom: 0.5rem; border-bottom: 1px solid var(--border); padding-bottom: 4px;
+}
+
+@media (max-width: 900px) { .schedule-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 600px) { .schedule-grid { grid-template-columns: repeat(2, 1fr); } }

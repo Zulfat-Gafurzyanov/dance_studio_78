@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Расписание — Студия 78</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<nav id="nav"></nav>
+
+<main class="admin-main">
+    <div class="page-header" style="margin-bottom:1.5rem">
+        <div class="section-label">Занятия</div>
+        <h1 class="page-title">РАСПИСАНИЕ</h1>
+        <div class="divider"></div>
+    </div>
+
+    <div class="schedule-nav">
+        <button class="btn btn-secondary" id="prev-week">&#8592; Назад</button>
+        <span class="schedule-week-label" id="week-label"></span>
+        <button class="btn btn-secondary" id="next-week">Вперёд &#8594;</button>
+    </div>
+
+    <div id="schedule-alert"></div>
+    <div class="schedule-grid" id="schedule-grid"></div>
+</main>
+
+<!-- Модальное окно занятия -->
+<div class="modal-overlay hidden" id="event-modal">
+    <div class="modal-box">
+        <button class="modal-close" id="modal-close">✕</button>
+        <div id="modal-content"></div>
+        <div id="modal-alert"></div>
+    </div>
+</div>
+
+<script type="module">
+import { api } from "./js/api.js";
+import { renderNav, isLoggedIn, showAlert } from "./js/utils.js";
+
+renderNav();
+
+const DAYS   = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const MONTHS_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const MONTHS_FULL  = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+const WEEKDAYS     = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+
+function getMonday(d) {
+    const date = new Date(d);
+    const day = date.getDay() || 7;
+    date.setDate(date.getDate() - day + 1);
+    date.setHours(0, 0, 0, 0);
+    return date;
+}
+function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
+function toISO(d)       { return d.toISOString().slice(0, 10); }
+
+let currentMonday = getMonday(new Date());
+let events = [];
+const enrolledIds = new Set();
+
+async function loadWeek() {
+    const from = toISO(currentMonday);
+    const to   = toISO(addDays(currentMonday, 6));
+    const end  = addDays(currentMonday, 6);
+
+    document.getElementById('week-label').textContent =
+        `${currentMonday.getDate()} ${MONTHS_SHORT[currentMonday.getMonth()]} — ` +
+        `${end.getDate()} ${MONTHS_SHORT[end.getMonth()]} ${end.getFullYear()}`;
+
+    try {
+        events = await api.getEvents(from, to);
+        renderGrid();
+    } catch (e) {
+        events = [];
+        renderGrid();
+        showAlert(document.getElementById('schedule-alert'), e.message || 'Не удалось загрузить расписание');
+    }
+}
+
+function spotsHtml(ev) {
+    const free = ev.max_students - ev.enrolled_count;
+    if (free <= 0) return '<span class="badge badge-full">Мест нет</span>';
+    if (free <= 2) return `<span class="badge badge-few">${free} место</span>`;
+    return `<span class="badge badge-ok">${free} мест</span>`;
+}
+
+function renderGrid() {
+    const today = toISO(new Date());
+    document.getElementById('schedule-grid').innerHTML = DAYS.map((day, i) => {
+        const date    = addDays(currentMonday, i);
+        const dateStr = toISO(date);
+        const dayEvs  = events
+            .filter(e => e.event_date === dateStr)
+            .sort((a, b) => a.time_start.localeCompare(b.time_start));
+        const isToday = dateStr === today;
+
+        return `<div class="schedule-day${isToday ? ' schedule-day--today' : ''}">
+            <div class="schedule-day-header">
+                <span class="schedule-day-name">${day}</span>
+                <span class="schedule-day-date">${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}</span>
+            </div>
+            <div class="schedule-day-events">
+                ${dayEvs.length ? dayEvs.map(e => {
+                    const cancelled = e.status === 'отменено';
+                    return `<div class="schedule-event-card${cancelled ? ' schedule-event-card--cancelled' : ''}" data-id="${e.id}">
+                        <div class="schedule-event-time">${e.time_start.slice(0,5)}</div>
+                        <div class="schedule-event-style">${e.style_name}</div>
+                        <div class="schedule-event-teacher">${e.substitute_teacher_name || e.teacher_name}</div>
+                        <div class="schedule-event-meta">
+                            <span>${e.duration_minutes} мин</span>
+                            ${cancelled ? '<span class="badge badge-cancelled">Отменено</span>' : spotsHtml(e)}
+                        </div>
+                    </div>`;
+                }).join('') : '<div class="schedule-empty">—</div>'}
+            </div>
+        </div>`;
+    }).join('');
+
+    document.querySelectorAll('.schedule-event-card').forEach(card => {
+        card.addEventListener('click', () => openModal(+card.dataset.id));
+    });
+}
+
+function openModal(id) {
+    const ev = events.find(e => e.id === id);
+    if (!ev) return;
+
+    const cancelled  = ev.status === 'отменено';
+    const free       = ev.max_students - ev.enrolled_count;
+    const logged     = isLoggedIn();
+    const isEnrolled = enrolledIds.has(id);
+
+    let actionHtml = '';
+    if (!cancelled) {
+        if (!logged) {
+            actionHtml = `<a href="auth" class="btn btn-primary">Войдите, чтобы записаться</a>`;
+        } else if (isEnrolled) {
+            actionHtml = `
+                <div class="modal-enrolled">✓ Вы записаны на это занятие</div>
+                <button class="btn btn-secondary" id="cancel-btn">Отменить запись</button>`;
+        } else if (free <= 0) {
+            actionHtml = `<button class="btn btn-primary" disabled>Мест нет</button>`;
+        } else {
+            actionHtml = `<button class="btn btn-primary" id="enroll-btn">Записаться</button>`;
+        }
+    }
+
+    const d = new Date(ev.event_date + 'T00:00:00');
+    document.getElementById('modal-content').innerHTML = `
+        <div class="modal-tag">${ev.style_name}</div>
+        <div class="modal-title">${WEEKDAYS[d.getDay()]}, ${d.getDate()} ${MONTHS_FULL[d.getMonth()]}</div>
+        <div class="modal-rows">
+            <div class="modal-row">
+                <span class="modal-row-label">Время</span>
+                <span>${ev.time_start.slice(0,5)} · ${ev.duration_minutes} мин</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-row-label">Преподаватель</span>
+                <span>${ev.teacher_name}${ev.substitute_teacher_name
+                    ? ` <span class="muted">(замена: ${ev.substitute_teacher_name})</span>` : ''}</span>
+            </div>
+            <div class="modal-row">
+                <span class="modal-row-label">Записалось</span>
+                <span>${ev.enrolled_count} / ${ev.max_students}</span>
+            </div>
+            ${cancelled ? '<div class="badge badge-cancelled" style="margin-top:6px">Занятие отменено</div>' : ''}
+        </div>
+        <div class="modal-actions">${actionHtml}</div>
+    `;
+
+    document.getElementById('event-modal').classList.remove('hidden');
+
+    document.getElementById('enroll-btn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('enroll-btn');
+        btn.disabled = true; btn.textContent = '...';
+        try {
+            await api.enroll(id);
+            enrolledIds.add(id);
+            ev.enrolled_count++;
+            openModal(id);
+            renderGrid();
+        } catch (e) {
+            showAlert(document.getElementById('modal-alert'), e.message);
+            btn.disabled = false; btn.textContent = 'Записаться';
+        }
+    });
+
+    document.getElementById('cancel-btn')?.addEventListener('click', async () => {
+        const btn = document.getElementById('cancel-btn');
+        btn.disabled = true; btn.textContent = '...';
+        try {
+            await api.cancelEnroll(id);
+            enrolledIds.delete(id);
+            ev.enrolled_count--;
+            openModal(id);
+            renderGrid();
+        } catch (e) {
+            showAlert(document.getElementById('modal-alert'), e.message);
+            btn.disabled = false; btn.textContent = 'Отменить запись';
+        }
+    });
+}
+
+document.getElementById('modal-close').addEventListener('click', () =>
+    document.getElementById('event-modal').classList.add('hidden'));
+document.getElementById('event-modal').addEventListener('click', e => {
+    if (e.target.id === 'event-modal') document.getElementById('event-modal').classList.add('hidden');
+});
+document.getElementById('prev-week').addEventListener('click', () => {
+    currentMonday = addDays(currentMonday, -7); loadWeek();
+});
+document.getElementById('next-week').addEventListener('click', () => {
+    currentMonday = addDays(currentMonday, 7); loadWeek();
+});
+
+loadWeek();
+</script>
+</body>
+</html>

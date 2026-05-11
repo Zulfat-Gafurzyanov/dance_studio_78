@@ -10,6 +10,7 @@ async function doRequest(method, path, body, token) {
     return fetch(`${BASE_URL}${path}`, {
         method,
         headers,
+        credentials: "include",
         body: body ? JSON.stringify(body) : null,
     });
 }
@@ -35,18 +36,11 @@ async function request(method, path, body = null, auth = true) {
 
     // Автоматический рефреш при истёкшем access token
     if (res.status === 401 && auth) {
-        const refreshToken = localStorage.getItem("refresh_token");
-        if (!refreshToken) {
-            localStorage.removeItem("access_token");
-            window.location.href = (window.location.pathname.includes("/admin/") ? "../" : "./") + "auth";
-            return;
-        }
         try {
-            const refreshRes = await doRequest("POST", "/auth/refresh", { refresh_token: refreshToken }, null);
+            const refreshRes = await doRequest("POST", "/auth/refresh", null, null);
             if (!refreshRes.ok) throw new Error();
             const tokens = await refreshRes.json();
             localStorage.setItem("access_token", tokens.access_token);
-            if (tokens.refresh_token) localStorage.setItem("refresh_token", tokens.refresh_token);
 
             // Повторяем исходный запрос с новым токеном
             const retry = await doRequest(method, path, body, tokens.access_token);
@@ -56,7 +50,6 @@ async function request(method, path, body = null, auth = true) {
             return retryData;
         } catch {
             localStorage.removeItem("access_token");
-            localStorage.removeItem("refresh_token");
             window.location.href = (window.location.pathname.includes("/admin/") ? "../" : "./") + "auth";
             return;
         }
@@ -79,7 +72,9 @@ export const api = {
     signIn: (email, password) =>
         request("POST", "/auth/sign-in", { email, password }, false),
     refresh: () =>
-        request("POST", "/auth/refresh", { refresh_token: localStorage.getItem("refresh_token") }, false),
+        request("POST", "/auth/refresh", null, false),
+    logout: () =>
+        request("POST", "/auth/logout", null, false),
 
     // Users
     getMe: () => request("GET", "/users/me"),
@@ -121,6 +116,24 @@ export const api = {
     // Studio info
     getStudioInfo: () => request("GET", "/studio-info", null, false),
     updateStudioInfo: (data) => request("PATCH", "/studio-info", data),
+
+    // Schedule — events (public)
+    getEvents: (from, to) => request("GET", `/schedule/events?date_from=${from}&date_to=${to}`, null, false),
+    getEvent: (id) => request("GET", `/schedule/events/${id}`, null, false),
+    enroll: (id) => request("POST", `/schedule/events/${id}/enroll`, null),
+    cancelEnroll: (id) => request("DELETE", `/schedule/events/${id}/enroll`, null),
+
+    // Schedule — admin events
+    getEventsAdmin: (from, to) => request("GET", `/schedule/events/admin?date_from=${from}&date_to=${to}`),
+    createEvent: (data) => request("POST", "/schedule/events", data),
+    updateEvent: (id, data) => request("PATCH", `/schedule/events/${id}`, data),
+    deleteEvent: (id) => request("DELETE", `/schedule/events/${id}`),
+
+    // Schedule — templates
+    getTemplates: () => request("GET", "/schedule/templates"),
+    createTemplate: (data) => request("POST", "/schedule/templates", data),
+    updateTemplate: (id, data) => request("PATCH", `/schedule/templates/${id}`, data),
+    deleteTemplate: (id) => request("DELETE", `/schedule/templates/${id}`),
 
     // Health
     health: () => request("GET", "/health", null, false),
