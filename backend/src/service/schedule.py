@@ -3,7 +3,7 @@ import datetime
 from fastapi import HTTPException, status
 
 from src.core.constants import BOOKING_HORIZON_DAYS
-from src.models.schedule import EventStatus
+from pg.models.schedule import EventStatus
 from src.repository.schedule import ScheduleRepository
 from src.schemas.schedule import (
     EnrollmentResponse,
