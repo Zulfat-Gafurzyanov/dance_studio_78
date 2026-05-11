@@ -168,6 +168,13 @@ class ScheduleRepository(BaseRepository):
 
     # ===== Enrollments =====
 
+    async def get_user_enrolled_event_ids(self, user_id: int) -> list[int]:
+        rows = await self.fetch_all(
+            "SELECT event_id FROM enrollment WHERE user_id = $1",
+            user_id,
+        )
+        return [row["event_id"] for row in rows]
+
     async def get_user_enrollment(self, event_id: int, user_id: int) -> asyncpg.Record | None:
         return await self.fetch_row(
             "SELECT id FROM enrollment WHERE event_id = $1 AND user_id = $2",

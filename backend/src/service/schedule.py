@@ -154,6 +154,9 @@ class ScheduleService:
 
     # ===== Enrollment =====
 
+    async def get_my_enrollments(self, user_id: int) -> list[int]:
+        return await self.repository.get_user_enrolled_event_ids(user_id)
+
     async def enroll(self, event_id: int, user_id: int) -> EnrollmentResponse:
         row = await self.repository.get_event_by_id(event_id)
         if not row:

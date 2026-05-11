@@ -107,6 +107,13 @@ async def delete_event(
 
 # ===== Enrollment =====
 
+@router.get("/my-enrollments")
+async def get_my_enrollments(
+    service: Annotated[ScheduleService, Depends(get_schedule_service)],
+    user_id: Annotated[int, Depends(get_current_user_id)],
+) -> list[int]:
+    return await service.get_my_enrollments(user_id)
+
 @router.post("/events/{event_id}/enroll", status_code=201)
 async def enroll(
     event_id: int,
