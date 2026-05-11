@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from src.core.config import settings
 from src.db.base import Base
-from src.models import *  # noqa: F401, F403 — import all models so Base.metadata is populated
+from pg.models import *  # noqa: F401, F403 — import all models so Base.metadata is populated
 
 target_metadata = Base.metadata
 

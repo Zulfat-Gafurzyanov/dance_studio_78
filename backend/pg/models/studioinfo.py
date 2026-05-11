@@ -11,12 +11,8 @@ class StudioInfo(Base):
     id: Mapped[int] = mapped_column(
         BigInteger, primary_key=True, autoincrement=True
     )
-    year_opened: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=2020
-    )
-    students_count: Mapped[int] = mapped_column(
-        Integer, nullable=False, default=0
-    )
+    year_opened: Mapped[int] = mapped_column(Integer, nullable=False)
+    students_count: Mapped[int] = mapped_column(Integer, nullable=False)
     phone: Mapped[str | None] = mapped_column(
         String(PHONE_MAX_LENGTH), nullable=True
     )
