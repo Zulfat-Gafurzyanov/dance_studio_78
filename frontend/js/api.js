@@ -118,6 +118,7 @@ export const api = {
     updateStudioInfo: (data) => request("PATCH", "/studio-info", data),
 
     // Schedule — events (public)
+    getMyEnrollments: () => request("GET", "/schedule/my-enrollments"),
     getEvents: (from, to) => request("GET", `/schedule/events?date_from=${from}&date_to=${to}`, null, false),
     getEvent: (id) => request("GET", `/schedule/events/${id}`, null, false),
     enroll: (id) => request("POST", `/schedule/events/${id}/enroll`, null),

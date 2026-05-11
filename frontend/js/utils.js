@@ -101,31 +101,27 @@ export function renderSidebar() {
         ).join('');
 }
 
-export function renderNav(adminLinks = false) {
-    const root = rootPath();
-    const logged = isLoggedIn();
-    const admin = isAdmin();
-
-    const publicLinks = `
-        <a href="${root}">Главная</a>
-    `;
+export function renderNav(centerLinks = null, leftLinks = null) {
+    const root        = rootPath();
+    const logged      = isLoggedIn();
+    const admin       = isAdmin();
+    const isAdminPage = window.location.pathname.includes('/admin/');
 
     const userLinks = logged ? `
+        ${!isAdminPage && admin ? `<a href="${root}admin/users">Админка</a>` : ""}
         <a href="${root}profile">Профиль</a>
-        ${admin ? `<a href="${root}admin/users">Админка</a>` : ""}
-        <a href="#" id="nav-logout">Выйти</a>
-    ` : `
-        <a href="${root}auth">Войти</a>
-    `;
+    ` : `<a href="${root}auth" class="btn-nav">Войти</a>`;
 
-    const adminSidebar = adminLinks && admin ? `
-        <div class="admin-sidebar-links">
-            <a href="${root}admin/users">Пользователи</a>
-            <a href="${root}admin/styles">Стили</a>
-            <a href="${root}admin/teachers">Преподаватели</a>
-            <a href="${root}admin/schedule">Расписание</a>
-        </div>
-    ` : "";
+    const defaultLinks = [{href: root, text: 'Главная'}];
+    const links = centerLinks || defaultLinks;
+
+    const leftHtml = leftLinks
+        ? `<div class="nav-left-links">${leftLinks.map(l => `<a href="${l.href}">${l.text}</a>`).join('')}</div>`
+        : '';
+
+    const centerHtml = isAdminPage
+        ? `<span class="nav-admin-zone">АДМИН-ЗОНА</span>`
+        : `<div class="nav-section-links">${links.map(l => `<a href="${l.href}">${l.text}</a>`).join('')}</div>`;
 
     const nav = document.getElementById("nav");
     if (nav) {
@@ -133,11 +129,9 @@ export function renderNav(adminLinks = false) {
             <a class="nav-brand" href="${root}">
                 <img src="${root}images/logo_78.png" alt="Семь-Восемь" class="nav-logo">
             </a>
-            <div class="nav-links">
-                ${publicLinks}
-                ${userLinks}
-            </div>
-            ${adminSidebar}
+            ${leftHtml}
+            ${centerHtml}
+            <div class="nav-auth">${userLinks}</div>
         `;
 
         const logoutBtn = document.getElementById("nav-logout");
