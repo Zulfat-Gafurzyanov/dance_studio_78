@@ -4,15 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход — Студия 78</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/landing.css">
 </head>
-<body>
+<body style="display:flex;flex-direction:column;min-height:100vh">
 
 <nav id="nav"></nav>
 
-<div class="auth-wrap">
+<div class="auth-wrap" style="flex:1;padding-top:70px">
     <div class="auth-box">
-        <h1>СЕМЬ<span>-ВОСЕМЬ</span></h1>
+        <img src="images/logo_78.png" alt="78" style="height:80px;margin:0 auto 0.75rem;display:block">
         <div class="auth-subtitle">Студия танцев Семь-Восемь</div>
 
         <div class="card">
@@ -56,42 +60,43 @@
 import { api } from "./js/api.js";
 import { setTokens, isLoggedIn, renderNav, showAlert } from "./js/utils.js";
 
-if (isLoggedIn()) window.location.href = "/";
+if (isLoggedIn()) window.location.href = '/';
 
 renderNav();
+document.querySelector('.nav-brand').style.visibility = 'hidden';
 
-// Tabs
-document.querySelectorAll(".tab").forEach(tab => {
-    tab.addEventListener("click", () => {
-        document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        document.getElementById("form-signin").style.display = tab.dataset.form === "signin" ? "block" : "none";
-        document.getElementById("form-signup").style.display = tab.dataset.form === "signup" ? "block" : "none";
+window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('form-signin').style.display = tab.dataset.form === 'signin' ? 'block' : 'none';
+        document.getElementById('form-signup').style.display = tab.dataset.form === 'signup' ? 'block' : 'none';
     });
 });
 
-document.getElementById("form-signin").addEventListener("submit", async (e) => {
+document.getElementById('form-signin').addEventListener('submit', async e => {
     e.preventDefault();
     try {
         const data = await api.signIn(e.target.email.value, e.target.password.value);
         setTokens(data.access_token);
-        window.location.href = "/";
+        window.location.href = '/';
     } catch (err) {
         showAlert(e.target, err.message);
     }
 });
 
-document.getElementById("form-signup").addEventListener("submit", async (e) => {
+document.getElementById('form-signup').addEventListener('submit', async e => {
     e.preventDefault();
-    const password = e.target.password.value;
+    const password         = e.target.password.value;
     const password_confirm = e.target.password_confirm.value;
-    if (password !== password_confirm) {
-        showAlert(e.target, "Пароли не совпадают");
-        return;
-    }
+    if (password !== password_confirm) { showAlert(e.target, 'Пароли не совпадают'); return; }
     try {
         await api.signUp(e.target.email.value, password, password_confirm);
-        showAlert(e.target, "Аккаунт создан! Войдите.", "success");
+        showAlert(e.target, 'Аккаунт создан! Войдите.', 'success');
     } catch (err) {
         showAlert(e.target, err.message);
     }

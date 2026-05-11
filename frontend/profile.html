@@ -4,13 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Профиль — Студия 78</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/landing.css">
 </head>
-<body>
+<body style="display:flex;flex-direction:column;min-height:100vh">
 
 <nav id="nav"></nav>
 
-<div class="container">
+<div class="container" style="flex:1;padding-top:110px">
     <div class="page-header">
         <div class="page-label">Аккаунт</div>
         <h1>ПРОФИЛЬ</h1>
@@ -52,26 +56,54 @@
     </div>
 </div>
 
+<footer>
+    <div class="footer-inner">
+        <div class="footer-studio">ТАНЦЕВАЛЬНАЯ СТУДИЯ · КАЗАНЬ</div>
+        <div class="footer-year">© <span id="footer-year"></span></div>
+    </div>
+</footer>
+
 <script type="module">
 import { api } from "./js/api.js";
 import { requireAuth, clearTokens, renderNav, showAlert, showConfirm } from "./js/utils.js";
 
 requireAuth();
-renderNav();
+renderNav([], [{href: './', text: 'Главная'}]);
 
-const container = document.querySelector(".container");
+// Добавляем «Выйти» только на странице профиля
+const navAuth = document.querySelector('.nav-auth');
+if (navAuth) {
+    const a = document.createElement('a');
+    a.href = '#';
+    a.textContent = 'Выйти';
+    a.style.color = 'rgba(220,50,50,0.7)';
+    a.addEventListener('click', async e => {
+        e.preventDefault();
+        await fetch('/api/v1/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => {});
+        clearTokens();
+        window.location.href = 'auth';
+    });
+    navAuth.appendChild(a);
+}
 
-const roleLabels = { user: "Пользователь", admin: "Администратор" };
+window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+const container = document.querySelector('.container');
+const roleLabels = { user: 'Пользователь', admin: 'Администратор' };
 
 api.getMe().then(user => {
-    document.getElementById("profile-email").value = user.email ?? "";
-    document.getElementById("profile-role").textContent = roleLabels[user.role] ?? user.role;
-    document.getElementById("profile-created").textContent =
-        new Date(user.created_at).toLocaleDateString("ru-RU", { day: "numeric", month: "long", year: "numeric" });
-    document.getElementById("profile-meta").style.display = "block";
+    document.getElementById('profile-email').value = user.email ?? '';
+    document.getElementById('profile-role').textContent = roleLabels[user.role] ?? user.role;
+    document.getElementById('profile-created').textContent =
+        new Date(user.created_at).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
+    document.getElementById('profile-meta').style.display = 'block';
 }).catch(err => showAlert(container, err.message));
 
-document.getElementById("form-profile").addEventListener("submit", async (e) => {
+document.getElementById('form-profile').addEventListener('submit', async e => {
     e.preventDefault();
     const body = {};
     const email    = e.target.email.value.trim();
@@ -81,19 +113,19 @@ document.getElementById("form-profile").addEventListener("submit", async (e) => 
     if (!Object.keys(body).length) return;
     try {
         await api.updateMe(body);
-        showAlert(container, "Профиль обновлён", "success");
-        e.target.password.value = "";
+        showAlert(container, 'Профиль обновлён', 'success');
+        e.target.password.value = '';
     } catch (err) {
         showAlert(container, err.message);
     }
 });
 
-document.getElementById("btn-delete").addEventListener("click", async () => {
-    if (!await showConfirm("Аккаунт будет удалён безвозвратно. Это действие нельзя отменить.", "Удалить аккаунт?")) return;
+document.getElementById('btn-delete').addEventListener('click', async () => {
+    if (!await showConfirm('Аккаунт будет удалён безвозвратно. Это действие нельзя отменить.', 'Удалить аккаунт?')) return;
     try {
         await api.deleteMe();
         clearTokens();
-        window.location.href = "auth";
+        window.location.href = 'auth';
     } catch (err) {
         showAlert(container, err.message);
     }

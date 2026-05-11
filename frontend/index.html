@@ -11,17 +11,6 @@
 
 <!-- NAV -->
 <nav id="nav">
-    <a class="nav-brand" href="#">
-        <img src="images/logo_78.png" alt="Семь-Восемь" class="nav-logo">
-    </a>
-    <div class="nav-section-links">
-        <a href="#styles">Направления</a>
-        <a href="#teachers">Преподаватели</a>
-        <a href="#prices">Цены</a>
-        <a href="schedule">Расписание</a>
-        <a href="#contacts">Контакты</a>
-    </div>
-    <div class="nav-auth" id="nav-auth"></div>
 </nav>
 
 <!-- HERO + ABOUT -->
@@ -83,27 +72,27 @@
 
 <!-- PRICES -->
 <section id="prices" class="section section-black">
-    <div class="section-label">Стоимость</div>
-    <h2 class="section-title">ЦЕНЫ</h2>
+    <div class="section-label">Цены</div>
+    <h2 class="section-title">СТОИМОСТЬ ЗАНЯТИЯ</h2>
     <div class="divider"></div>
     <div class="prices-grid" id="prices-list"></div>
 </section>
 
 <!-- BOOKING -->
-<section id="booking" class="section section-black booking-section">
-    <div class="section-label">Первый шаг</div>
+<section id="booking" class="section section-dark">
+    <div class="section-label">Запись</div>
     <h2 class="section-title">НАЧНИ ТАНЦЕВАТЬ</h2>
     <div class="divider"></div>
     <p class="booking-desc">Выбери удобное время и направление — займёт меньше минуты.</p>
-    <a class="booking-btn" href="https://elflowdancemailru.impulsecrm.ru/widget/1" target="_blank" rel="noopener">
-        Записаться онлайн
+    <a class="booking-btn" href="schedule">
+        Записаться
     </a>
 </section>
 
 <!-- CONTACTS -->
 <section id="contacts" class="section section-black">
-    <div class="section-label">Связь и соцсети</div>
-    <h2 class="section-title">КОНТАКТЫ</h2>
+    <div class="section-label">Контакты</div>
+    <h2 class="section-title">СВЯЗЬ И СОЦСЕТИ</h2>
     <div class="divider"></div>
     <div class="contacts-grid">
         <div>
@@ -168,13 +157,23 @@
 
 <!-- FOOTER -->
 <footer>
-    <div class="footer-logo">СЕМЬ-ВОСЕМЬ</div>
-    <div class="footer-copy">© 2025 Студия «Семь-Восемь». Все права защищены.</div>
+    <div class="footer-inner">
+        <div class="footer-studio">ТАНЦЕВАЛЬНАЯ СТУДИЯ · КАЗАНЬ</div>
+        <div class="footer-year">© <span id="footer-year"></span></div>
+    </div>
 </footer>
 
 <script type="module">
 import { api } from "./js/api.js";
-import { isLoggedIn, isAdmin } from "./js/utils.js";
+import { renderNav, isLoggedIn, isAdmin } from "./js/utils.js";
+
+renderNav([
+    {href: '#styles',   text: 'Направления'},
+    {href: '#teachers', text: 'Команда'},
+    {href: '#prices',   text: 'Цены'},
+    {href: '#booking',  text: 'Запись'},
+    {href: '#contacts', text: 'Контакты'},
+]);
 
 // ── Studio info ───────────────────────────────────────
 function roundStudents(n) {
@@ -206,21 +205,14 @@ api.getStudioInfo().then(s => {
 
 }).catch(() => {});
 
-// ── Auth nav ──────────────────────────────────────────
-const authEl = document.getElementById("nav-auth");
-if (isLoggedIn()) {
-    authEl.innerHTML = `
-        ${isAdmin() ? `<a href="admin/users">Админка</a>` : ""}
-        <a href="profile">Профиль</a>
-    `;
-} else {
-    authEl.innerHTML = `<a href="auth" class="btn-nav">Войти</a>`;
-}
 
 // ── Sticky nav ────────────────────────────────────────
 window.addEventListener("scroll", () => {
     document.getElementById("nav").classList.toggle("scrolled", window.scrollY > 60);
 });
+
+// ── Footer year ───────────────────────────────────────
+document.getElementById("footer-year").textContent = new Date().getFullYear();
 
 // ── Carousel ─────────────────────────────────────────
 function buildCarousel(photos, aspect, fit = "cover") {
