@@ -25,7 +25,7 @@ async def test_sign_up_success(client: AsyncClient, mock_db_conn):
     assert resp.status_code == 201
     body = resp.json()
     assert "access_token" in body
-    assert "refresh_token" in body
+    assert "refresh_token" in resp.cookies
 
     payload = security.decode_access_token(body["access_token"])
     assert payload["user_id"] == 1
@@ -62,7 +62,7 @@ async def test_sign_in_returns_valid_jwt(client: AsyncClient, mock_db_conn):
     assert resp.status_code == 200
     body = resp.json()
     assert "access_token" in body
-    assert "refresh_token" in body
+    assert "refresh_token" in resp.cookies
 
     payload = security.decode_access_token(body["access_token"])
     assert payload["user_id"] == 42
