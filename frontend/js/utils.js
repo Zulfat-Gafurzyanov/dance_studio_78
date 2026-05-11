@@ -2,14 +2,12 @@ export function getToken() {
     return localStorage.getItem("access_token");
 }
 
-export function setTokens(access, refresh) {
+export function setTokens(access) {
     localStorage.setItem("access_token", access);
-    if (refresh) localStorage.setItem("refresh_token", refresh);
 }
 
 export function clearTokens() {
     localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
 }
 
 export function parseJwt(token) {
@@ -85,6 +83,24 @@ export function showAlert(container, msg, type = "error") {
     setTimeout(() => el.remove(), 4000);
 }
 
+export function renderSidebar() {
+    const el = document.getElementById('admin-sidebar');
+    if (!el) return;
+    const links = [
+        ['users',    'Пользователи'],
+        ['styles',   'Стили'],
+        ['teachers', 'Преподаватели'],
+        ['prices',   'Цены'],
+        ['studio',   'Студия'],
+        ['schedule', 'Расписание'],
+    ];
+    const current = window.location.pathname.split('/').pop();
+    el.innerHTML = '<h3>Управление</h3>' +
+        links.map(([href, label]) =>
+            `<a href="${href}"${current === href ? ' class="active"' : ''}>${label}</a>`
+        ).join('');
+}
+
 export function renderNav(adminLinks = false) {
     const root = rootPath();
     const logged = isLoggedIn();
@@ -107,6 +123,7 @@ export function renderNav(adminLinks = false) {
             <a href="${root}admin/users">Пользователи</a>
             <a href="${root}admin/styles">Стили</a>
             <a href="${root}admin/teachers">Преподаватели</a>
+            <a href="${root}admin/schedule">Расписание</a>
         </div>
     ` : "";
 
@@ -125,8 +142,9 @@ export function renderNav(adminLinks = false) {
 
         const logoutBtn = document.getElementById("nav-logout");
         if (logoutBtn) {
-            logoutBtn.addEventListener("click", (e) => {
+            logoutBtn.addEventListener("click", async (e) => {
                 e.preventDefault();
+                await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" }).catch(() => {});
                 clearTokens();
                 window.location.href = root + "auth";
             });

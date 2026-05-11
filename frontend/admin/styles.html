@@ -11,13 +11,7 @@
 <nav id="nav"></nav>
 
 <div class="admin-layout">
-    <aside class="admin-sidebar">
-        <h3>Управление</h3>
-        <a href="users">Пользователи</a>
-        <a href="styles">Стили</a>
-        <a href="teachers">Преподаватели</a>
-        <a href="studio">Студия</a>
-    </aside>
+    <aside class="admin-sidebar" id="admin-sidebar"></aside>
 
     <div class="admin-content">
         <div class="page-header">
@@ -106,14 +100,13 @@
 
 <script type="module">
 import { api } from "../js/api.js";
-import { requireAdmin, renderNav, showAlert, showConfirm, hideUntilReady } from "../js/utils.js";
+import { requireAdmin, renderNav, renderSidebar, showAlert, showConfirm, hideUntilReady } from "../js/utils.js";
 import { buildPhotoGrid, initPhotoGrids } from "../js/photos.js";
 
 hideUntilReady();
 requireAdmin();
 renderNav();
-
-document.querySelector('.admin-sidebar a[href="styles"]').classList.add("active");
+renderSidebar();
 
 const content = document.querySelector(".admin-content");
 
