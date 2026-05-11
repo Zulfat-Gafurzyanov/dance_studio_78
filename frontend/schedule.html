@@ -8,79 +8,90 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/landing.css">
 </head>
-<body>
+<body style="display:flex;flex-direction:column;min-height:100vh">
 
 <nav id="nav"></nav>
 
-<main class="admin-main">
-    <div class="page-header" style="margin-bottom:1.5rem">
-        <div class="section-label">Занятия</div>
-        <h1 class="page-title">РАСПИСАНИЕ</h1>
-        <div class="divider"></div>
-    </div>
+<section class="section section-black" style="flex:1;padding-top:130px">
+    <div class="section-label">Запись</div>
+    <h2 class="section-title">РАСПИСАНИЕ</h2>
+    <div class="divider"></div>
 
     <div class="schedule-nav">
         <button class="btn btn-secondary" id="prev-week">&#8592; Назад</button>
-        <span class="schedule-week-label" id="week-label"></span>
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;min-height:58px;justify-content:center">
+            <span class="schedule-week-label" id="week-label"></span>
+            <button class="btn btn-secondary" id="current-week-btn" style="font-size:0.75rem;padding:0.25rem 1rem;visibility:hidden">Текущая неделя</button>
+        </div>
         <button class="btn btn-secondary" id="next-week">Вперёд &#8594;</button>
     </div>
 
-    <div id="schedule-alert"></div>
     <div class="schedule-grid" id="schedule-grid"></div>
-</main>
+</section>
 
-<!-- Модальное окно занятия -->
-<div class="modal-overlay hidden" id="event-modal">
-    <div class="modal-box">
-        <button class="modal-close" id="modal-close">✕</button>
-        <div id="modal-content"></div>
-        <div id="modal-alert"></div>
+<footer>
+    <div class="footer-inner">
+        <div class="footer-studio">ТАНЦЕВАЛЬНАЯ СТУДИЯ · КАЗАНЬ</div>
+        <div class="footer-year">© <span id="footer-year"></span></div>
     </div>
-</div>
+</footer>
+
 
 <script type="module">
 import { api } from "./js/api.js";
-import { renderNav, isLoggedIn, showAlert } from "./js/utils.js";
+import { renderNav, isLoggedIn } from "./js/utils.js";
 
-renderNav();
+renderNav([], [{href: './', text: 'Главная'}]);
 
-const DAYS   = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+document.getElementById('footer-year').textContent = new Date().getFullYear();
+
+const DAYS         = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 const MONTHS_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-const MONTHS_FULL  = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
-const WEEKDAYS     = ['Воскресенье','Понедельник','Вторник','Среда','Четверг','Пятница','Суббота'];
+const BOOKING_HORIZON_DAYS = 28;
+const logged = isLoggedIn();
 
 function getMonday(d) {
-    const date = new Date(d);
-    const day = date.getDay() || 7;
-    date.setDate(date.getDate() - day + 1);
-    date.setHours(0, 0, 0, 0);
-    return date;
+    const date = new Date(d); const day = date.getDay() || 7;
+    date.setDate(date.getDate() - day + 1); date.setHours(0, 0, 0, 0); return date;
 }
 function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
-function toISO(d)       { return d.toISOString().slice(0, 10); }
+function toISO(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
 let currentMonday = getMonday(new Date());
 let events = [];
 const enrolledIds = new Set();
 
+if (logged) {
+    api.getMyEnrollments().then(ids => { ids.forEach(id => enrolledIds.add(id)); renderGrid(); }).catch(() => {});
+}
+
+function updateNavButtons() {
+    const todayMonday = getMonday(new Date());
+    const maxMonday   = getMonday(addDays(new Date(), BOOKING_HORIZON_DAYS - 6));
+    document.getElementById('prev-week').disabled       = toISO(currentMonday) <= toISO(todayMonday);
+    document.getElementById('next-week').disabled       = toISO(addDays(currentMonday, 7)) > toISO(maxMonday);
+    document.getElementById('current-week-btn').style.visibility =
+        toISO(currentMonday) === toISO(todayMonday) ? 'hidden' : 'visible';
+}
+
 async function loadWeek() {
     const from = toISO(currentMonday);
     const to   = toISO(addDays(currentMonday, 6));
     const end  = addDays(currentMonday, 6);
-
     document.getElementById('week-label').textContent =
         `${currentMonday.getDate()} ${MONTHS_SHORT[currentMonday.getMonth()]} — ` +
         `${end.getDate()} ${MONTHS_SHORT[end.getMonth()]} ${end.getFullYear()}`;
-
-    try {
-        events = await api.getEvents(from, to);
-        renderGrid();
-    } catch (e) {
-        events = [];
-        renderGrid();
-        showAlert(document.getElementById('schedule-alert'), e.message || 'Не удалось загрузить расписание');
-    }
+    updateNavButtons();
+    try { events = await api.getEvents(from, to); } catch { events = []; }
+    renderGrid();
 }
 
 function spotsHtml(ev) {
@@ -90,134 +101,108 @@ function spotsHtml(ev) {
     return `<span class="badge badge-ok">${free} мест</span>`;
 }
 
+function renderCard(e) {
+    const cancelled  = e.status === 'отменено';
+    const free       = e.max_students - e.enrolled_count;
+    const isEnrolled = enrolledIds.has(e.id);
+    const hasSub     = !!e.substitute_teacher_name;
+
+    const teacherHtml = hasSub
+        ? `<div class="schedule-event-teacher">${e.teacher_name}</div>
+           <div class="schedule-event-teacher-sub">замена: <b style="color:#fff">${e.substitute_teacher_name}</b></div>`
+        : `<div class="schedule-event-teacher">${e.teacher_name}</div>`;
+
+    const isPast = e.event_date < toISO(new Date());
+
+    let action = '';
+    if (!cancelled && !isPast) {
+        if (!logged)         action = `<a href="auth" class="btn btn-primary schedule-event-btn">Войти для записи</a>`;
+        else if (isEnrolled) action = `<div class="schedule-event-enrolled">✓ Вы записаны</div>
+                                       <button class="btn btn-secondary schedule-event-btn" data-cancel="${e.id}">Отменить</button>`;
+        else if (free <= 0)  action = `<button class="btn schedule-event-btn" disabled style="opacity:.4">Мест нет</button>`;
+        else                 action = `<button class="btn btn-primary schedule-event-btn" data-enroll="${e.id}">Записаться</button>`;
+    }
+
+    return `<div class="schedule-event-card${cancelled ? ' schedule-event-card--cancelled' : ''}${hasSub ? ' schedule-event-card--substitute' : ''}">
+        <div class="schedule-event-time">${e.time_start.slice(0,5)}</div>
+        <div class="schedule-event-style">${e.style_name}</div>
+        ${teacherHtml}
+        <div class="schedule-event-meta">
+            <span>${e.duration_minutes} мин</span>
+            ${cancelled ? '<span class="badge badge-cancelled">Отменено</span>' : spotsHtml(e)}
+        </div>
+        ${action}
+    </div>`;
+}
+
 function renderGrid() {
     const today = toISO(new Date());
+
+    if (!events.length) {
+        document.getElementById('schedule-grid').innerHTML = `
+            <div style="grid-column:1/-1;text-align:center;padding:3rem 1rem">
+                <div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold);letter-spacing:0.05em;margin-bottom:0.5rem">
+                    Занятия ещё не назначены
+                </div>
+                <div style="color:var(--muted);font-size:0.9rem;line-height:1.7">
+                    Расписание на эту неделю скоро появится.<br>Загляните позже или выберите другую неделю.
+                </div>
+            </div>`;
+        return;
+    }
+
     document.getElementById('schedule-grid').innerHTML = DAYS.map((day, i) => {
         const date    = addDays(currentMonday, i);
         const dateStr = toISO(date);
-        const dayEvs  = events
-            .filter(e => e.event_date === dateStr)
-            .sort((a, b) => a.time_start.localeCompare(b.time_start));
         const isToday = dateStr === today;
-
+        const dayEvs  = events.filter(e => e.event_date === dateStr)
+                              .sort((a, b) => a.time_start.localeCompare(b.time_start));
         return `<div class="schedule-day${isToday ? ' schedule-day--today' : ''}">
             <div class="schedule-day-header">
                 <span class="schedule-day-name">${day}</span>
                 <span class="schedule-day-date">${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}</span>
             </div>
             <div class="schedule-day-events">
-                ${dayEvs.length ? dayEvs.map(e => {
-                    const cancelled = e.status === 'отменено';
-                    return `<div class="schedule-event-card${cancelled ? ' schedule-event-card--cancelled' : ''}" data-id="${e.id}">
-                        <div class="schedule-event-time">${e.time_start.slice(0,5)}</div>
-                        <div class="schedule-event-style">${e.style_name}</div>
-                        <div class="schedule-event-teacher">${e.substitute_teacher_name || e.teacher_name}</div>
-                        <div class="schedule-event-meta">
-                            <span>${e.duration_minutes} мин</span>
-                            ${cancelled ? '<span class="badge badge-cancelled">Отменено</span>' : spotsHtml(e)}
-                        </div>
-                    </div>`;
-                }).join('') : '<div class="schedule-empty">—</div>'}
+                ${dayEvs.length ? dayEvs.map(renderCard).join('') : '<div class="schedule-empty">—</div>'}
             </div>
         </div>`;
     }).join('');
 
-    document.querySelectorAll('.schedule-event-card').forEach(card => {
-        card.addEventListener('click', () => openModal(+card.dataset.id));
+    document.querySelectorAll('[data-enroll]').forEach(btn => {
+        btn.addEventListener('click', () => handleEnroll(+btn.dataset.enroll, btn));
+    });
+    document.querySelectorAll('[data-cancel]').forEach(btn => {
+        btn.addEventListener('click', () => handleCancel(+btn.dataset.cancel, btn));
     });
 }
 
-function openModal(id) {
+async function handleEnroll(id, btn) {
+    btn.disabled = true; btn.textContent = '...';
     const ev = events.find(e => e.id === id);
-    if (!ev) return;
-
-    const cancelled  = ev.status === 'отменено';
-    const free       = ev.max_students - ev.enrolled_count;
-    const logged     = isLoggedIn();
-    const isEnrolled = enrolledIds.has(id);
-
-    let actionHtml = '';
-    if (!cancelled) {
-        if (!logged) {
-            actionHtml = `<a href="auth" class="btn btn-primary">Войдите, чтобы записаться</a>`;
-        } else if (isEnrolled) {
-            actionHtml = `
-                <div class="modal-enrolled">✓ Вы записаны на это занятие</div>
-                <button class="btn btn-secondary" id="cancel-btn">Отменить запись</button>`;
-        } else if (free <= 0) {
-            actionHtml = `<button class="btn btn-primary" disabled>Мест нет</button>`;
-        } else {
-            actionHtml = `<button class="btn btn-primary" id="enroll-btn">Записаться</button>`;
-        }
+    try {
+        await api.enroll(id);
+        enrolledIds.add(id);
+        if (ev) ev.enrolled_count++;
+    } catch (e) {
+        if (e.message.includes('уже записаны')) enrolledIds.add(id);
     }
-
-    const d = new Date(ev.event_date + 'T00:00:00');
-    document.getElementById('modal-content').innerHTML = `
-        <div class="modal-tag">${ev.style_name}</div>
-        <div class="modal-title">${WEEKDAYS[d.getDay()]}, ${d.getDate()} ${MONTHS_FULL[d.getMonth()]}</div>
-        <div class="modal-rows">
-            <div class="modal-row">
-                <span class="modal-row-label">Время</span>
-                <span>${ev.time_start.slice(0,5)} · ${ev.duration_minutes} мин</span>
-            </div>
-            <div class="modal-row">
-                <span class="modal-row-label">Преподаватель</span>
-                <span>${ev.teacher_name}${ev.substitute_teacher_name
-                    ? ` <span class="muted">(замена: ${ev.substitute_teacher_name})</span>` : ''}</span>
-            </div>
-            <div class="modal-row">
-                <span class="modal-row-label">Записалось</span>
-                <span>${ev.enrolled_count} / ${ev.max_students}</span>
-            </div>
-            ${cancelled ? '<div class="badge badge-cancelled" style="margin-top:6px">Занятие отменено</div>' : ''}
-        </div>
-        <div class="modal-actions">${actionHtml}</div>
-    `;
-
-    document.getElementById('event-modal').classList.remove('hidden');
-
-    document.getElementById('enroll-btn')?.addEventListener('click', async () => {
-        const btn = document.getElementById('enroll-btn');
-        btn.disabled = true; btn.textContent = '...';
-        try {
-            await api.enroll(id);
-            enrolledIds.add(id);
-            ev.enrolled_count++;
-            openModal(id);
-            renderGrid();
-        } catch (e) {
-            showAlert(document.getElementById('modal-alert'), e.message);
-            btn.disabled = false; btn.textContent = 'Записаться';
-        }
-    });
-
-    document.getElementById('cancel-btn')?.addEventListener('click', async () => {
-        const btn = document.getElementById('cancel-btn');
-        btn.disabled = true; btn.textContent = '...';
-        try {
-            await api.cancelEnroll(id);
-            enrolledIds.delete(id);
-            ev.enrolled_count--;
-            openModal(id);
-            renderGrid();
-        } catch (e) {
-            showAlert(document.getElementById('modal-alert'), e.message);
-            btn.disabled = false; btn.textContent = 'Отменить запись';
-        }
-    });
+    renderGrid();
 }
 
-document.getElementById('modal-close').addEventListener('click', () =>
-    document.getElementById('event-modal').classList.add('hidden'));
-document.getElementById('event-modal').addEventListener('click', e => {
-    if (e.target.id === 'event-modal') document.getElementById('event-modal').classList.add('hidden');
-});
-document.getElementById('prev-week').addEventListener('click', () => {
-    currentMonday = addDays(currentMonday, -7); loadWeek();
-});
-document.getElementById('next-week').addEventListener('click', () => {
-    currentMonday = addDays(currentMonday, 7); loadWeek();
-});
+async function handleCancel(id, btn) {
+    btn.disabled = true; btn.textContent = '...';
+    const ev = events.find(e => e.id === id);
+    try {
+        await api.cancelEnroll(id);
+        enrolledIds.delete(id);
+        if (ev) ev.enrolled_count--;
+    } catch {}
+    renderGrid();
+}
+
+document.getElementById('prev-week').addEventListener('click', () => { currentMonday = addDays(currentMonday, -7); loadWeek(); });
+document.getElementById('next-week').addEventListener('click', () => { currentMonday = addDays(currentMonday,  7); loadWeek(); });
+document.getElementById('current-week-btn').addEventListener('click', () => { currentMonday = getMonday(new Date()); loadWeek(); });
 
 loadWeek();
 </script>
