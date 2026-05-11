@@ -15,40 +15,36 @@
 
 <div class="admin-layout">
     <aside class="admin-sidebar" id="admin-sidebar"></aside>
-<main class="admin-main">
+    <div class="admin-content">
 
-    <div class="admin-page-header">
-        <h1 class="admin-title">Расписание</h1>
-        <div class="admin-tabs" id="tabs">
+<div class="admin-tabs" id="tabs" style="margin-bottom:1.5rem">
             <button class="admin-tab active" data-tab="events">Занятия</button>
-            <button class="admin-tab" data-tab="templates">Шаблоны</button>
+            <button class="admin-tab" data-tab="templates">Шаблон</button>
         </div>
-    </div>
 
-    <!-- ===== ЗАНЯТИЯ ===== -->
-    <div id="tab-events">
-        <div class="admin-toolbar">
-            <div class="schedule-nav" style="flex:1">
+        <!-- ===== ЗАНЯТИЯ ===== -->
+        <div id="tab-events">
+            <div class="admin-toolbar">
                 <button class="btn btn-secondary" id="prev-week">&#8592;</button>
-                <span class="schedule-week-label" id="week-label"></span>
+                <div style="display:flex;flex-direction:column;align-items:center;gap:4px;min-width:190px;flex-shrink:0">
+                    <span class="schedule-week-label" id="week-label"></span>
+                    <button class="btn btn-secondary" id="current-week-btn" style="font-size:0.72rem;padding:0.2rem 0.9rem;visibility:hidden;white-space:nowrap">Текущая неделя</button>
+                </div>
                 <button class="btn btn-secondary" id="next-week">&#8594;</button>
+                <button class="btn btn-primary" id="apply-template-btn" style="margin-left:auto;white-space:nowrap">Использовать шаблон</button>
+                <button class="btn btn-danger" id="clear-week-btn" style="white-space:nowrap">Очистить неделю</button>
             </div>
-            <button class="btn btn-primary" id="create-event-btn">+ Занятие</button>
+            <div id="events-alert"></div>
+            <div class="schedule-grid" id="events-list"></div>
         </div>
-        <div id="events-alert"></div>
-        <div id="events-list"></div>
-    </div>
 
-    <!-- ===== ШАБЛОНЫ ===== -->
-    <div id="tab-templates" style="display:none">
-        <div class="admin-toolbar">
-            <button class="btn btn-primary" id="create-tpl-btn">+ Шаблон</button>
+        <!-- ===== ШАБЛОН ===== -->
+        <div id="tab-templates" style="display:none">
+            <div id="templates-alert"></div>
+            <div class="schedule-grid" id="templates-list"></div>
         </div>
-        <div id="templates-alert"></div>
-        <div id="templates-list"></div>
-    </div>
 
-</main>
+    </div>
 </div>
 
 <!-- ===== Модалка: занятие ===== -->
@@ -58,6 +54,12 @@
         <div class="modal-title" id="event-modal-title">Занятие</div>
         <div id="event-modal-alert"></div>
         <form id="event-form">
+            <div class="form-group" id="ev-tpl-wrap">
+                <label class="form-label">Из шаблона (необязательно)</label>
+                <select class="form-input" id="ev-template">
+                    <option value="">— без шаблона —</option>
+                </select>
+            </div>
             <div class="form-group">
                 <label class="form-label">Направление</label>
                 <select class="form-input" name="style_id" required id="ev-style"></select>
@@ -147,9 +149,11 @@
                 </div>
             </div>
             <div class="form-group">
-                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">
-                    <input type="checkbox" name="is_active" id="tpl-active" checked> Активен
-                </label>
+                <label class="form-label">Статус</label>
+                <select class="form-input" id="tpl-active">
+                    <option value="true">Активен</option>
+                    <option value="false">Неактивен</option>
+                </select>
             </div>
             <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1rem">
                 <button type="button" class="btn btn-secondary" id="tpl-modal-cancel">Отмена</button>
@@ -170,23 +174,26 @@ renderSidebar();
 
 const MONTHS_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
 const DAY_NAMES    = ['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'];
+const DAY_ABBR     = ['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
 
 function addDays(d, n) { const r = new Date(d); r.setDate(r.getDate() + n); return r; }
-function toISO(d)       { return d.toISOString().slice(0, 10); }
+function toISO(d) {
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 function getMonday(d) {
     const date = new Date(d); const day = date.getDay() || 7;
     date.setDate(date.getDate() - day + 1); date.setHours(0,0,0,0); return date;
 }
 
 // ── Shared data ──────────────────────────────────────
-let styles = [], teachers = [];
+let styles = [], teachers = [], templates = [];
 let currentMonday = getMonday(new Date());
 let weekEvents = [];
 let editingEventId = null;
 let editingTplId   = null;
 
 async function loadShared() {
-    [styles, teachers] = await Promise.all([api.getStyles(), api.getTeachers()]);
+    [styles, teachers, templates] = await Promise.all([api.getStyles(), api.getTeachers(), api.getTemplates()]);
 }
 
 function populateSelect(sel, items, valueFn, labelFn, extra = '') {
@@ -207,59 +214,77 @@ document.querySelectorAll('.admin-tab').forEach(btn => {
 });
 
 // ── Week navigation ───────────────────────────────────
-function updateWeekLabel() {
-    const end = addDays(currentMonday, 6);
-    document.getElementById('week-label').textContent =
-        `${currentMonday.getDate()} ${MONTHS_SHORT[currentMonday.getMonth()]} — ` +
-        `${end.getDate()} ${MONTHS_SHORT[end.getMonth()]} ${end.getFullYear()}`;
-}
-
 async function loadWeekEvents() {
-    updateWeekLabel();
     const from = toISO(currentMonday);
     const to   = toISO(addDays(currentMonday, 6));
     try {
         weekEvents = await api.getEventsAdmin(from, to);
         renderWeekEvents();
+        updateWeekLabel();
     } catch (e) {
         showAlert(document.getElementById('events-alert'), e.message);
     }
 }
 
 function renderWeekEvents() {
-    const el = document.getElementById('events-list');
-    const byDay = {};
-    for (let i = 0; i < 7; i++) byDay[toISO(addDays(currentMonday, i))] = [];
-    weekEvents.forEach(ev => { if (byDay[ev.event_date]) byDay[ev.event_date].push(ev); });
-
-    el.innerHTML = Object.entries(byDay).map(([date, evs]) => {
-        const d = new Date(date + 'T00:00:00');
-        const dayName = `${DAY_NAMES[d.getDay() === 0 ? 6 : d.getDay()-1]}, ${d.getDate()} ${MONTHS_SHORT[d.getMonth()]}`;
-        const sorted  = [...evs].sort((a,b) => a.time_start.localeCompare(b.time_start));
-        return `<div class="schedule-day-group">
-            <div class="schedule-day-group-title">${dayName}</div>
-            ${sorted.length ? sorted.map(ev => `
-                <div class="schedule-admin-event${ev.status === 'отменено' ? ' schedule-admin-event--cancelled' : ''}">
-                    <div class="schedule-admin-event-info">
-                        <div class="schedule-admin-event-title">${ev.time_start.slice(0,5)} · ${ev.style_name}</div>
-                        <div class="schedule-admin-event-sub">
-                            ${ev.teacher_name}${ev.substitute_teacher_name ? ` → ${ev.substitute_teacher_name}` : ''}
-                            · ${ev.duration_minutes} мин · ${ev.enrolled_count}/${ev.max_students}
-                            ${ev.status === 'отменено' ? ' · <span style="color:var(--muted)">отменено</span>' : ''}
+    const el    = document.getElementById('events-list');
+    const today = toISO(new Date());
+    el.innerHTML = Array.from({length: 7}, (_, i) => {
+        const date    = addDays(currentMonday, i);
+        const dateStr = toISO(date);
+        const isToday = dateStr === today;
+        const dayIdx  = date.getDay() === 0 ? 6 : date.getDay() - 1;
+        const sorted  = weekEvents
+            .filter(ev => ev.event_date === dateStr)
+            .sort((a, b) => a.time_start.localeCompare(b.time_start));
+        return `<div class="schedule-day${isToday ? ' schedule-day--today' : ''}">
+            <div class="schedule-day-header">
+                <span class="schedule-day-name">${DAY_ABBR[i]}</span>
+                <span class="schedule-day-date">${date.getDate()} ${MONTHS_SHORT[date.getMonth()]}</span>
+            </div>
+            <div class="schedule-day-events">
+                ${sorted.length ? sorted.map(ev => {
+                    const cancelled = ev.status === 'отменено';
+                    return `<div class="schedule-event-card${cancelled ? ' schedule-event-card--cancelled' : ''}">
+                        <div class="schedule-event-time">${ev.time_start.slice(0,5)}</div>
+                        <div class="schedule-event-style">${ev.style_name}</div>
+                        <div class="schedule-event-teacher">${ev.teacher_name}${ev.substitute_teacher_name ? ` → ${ev.substitute_teacher_name}` : ''}</div>
+                        <div class="schedule-event-meta">
+                            <span>${ev.duration_minutes} мин</span>
+                            <span>${ev.enrolled_count}/${ev.max_students}</span>
+                            ${cancelled ? '<span class="badge badge-cancelled">Отменено</span>' : ''}
                         </div>
-                    </div>
-                    <div class="schedule-admin-event-btns">
-                        <button class="btn btn-secondary btn-sm" onclick="editEvent(${ev.id})">Ред.</button>
-                        <button class="btn btn-danger btn-sm"    onclick="deleteEvent(${ev.id})">Удал.</button>
-                    </div>
-                </div>
-            `).join('') : '<div style="color:var(--muted);font-size:0.8rem;padding:0.25rem 0">Нет занятий</div>'}
+                        <div class="schedule-event-card-actions">
+                            <button class="btn btn-secondary btn-sm" style="flex:1;font-size:0.65rem;padding:2px 0" onclick="editEvent(${ev.id})">Ред.</button>
+                            <button class="btn btn-danger btn-sm"    style="flex:1;font-size:0.65rem;padding:2px 0" onclick="deleteEvent(${ev.id})">Удал.</button>
+                        </div>
+                    </div>`;
+                }).join('') : '<div class="schedule-empty">—</div>'}
+            </div>
         </div>`;
     }).join('');
 }
 
+const BOOKING_HORIZON_DAYS = 28;
+
+function updateWeekLabel() {
+    const end         = addDays(currentMonday, 6);
+    const todayMonday = getMonday(new Date());
+    const maxMonday   = getMonday(addDays(new Date(), BOOKING_HORIZON_DAYS - 6));
+
+    document.getElementById('week-label').textContent =
+        `${currentMonday.getDate()} ${MONTHS_SHORT[currentMonday.getMonth()]} — ` +
+        `${end.getDate()} ${MONTHS_SHORT[end.getMonth()]} ${end.getFullYear()}`;
+
+    document.getElementById('prev-week').disabled       = toISO(currentMonday) <= toISO(todayMonday);
+    document.getElementById('next-week').disabled       = toISO(addDays(currentMonday, 7)) > toISO(maxMonday);
+    document.getElementById('current-week-btn').style.visibility =
+        toISO(currentMonday) === toISO(todayMonday) ? 'hidden' : 'visible';
+}
+
 document.getElementById('prev-week').addEventListener('click', () => { currentMonday = addDays(currentMonday, -7); loadWeekEvents(); });
 document.getElementById('next-week').addEventListener('click', () => { currentMonday = addDays(currentMonday,  7); loadWeekEvents(); });
+document.getElementById('current-week-btn').addEventListener('click', () => { currentMonday = getMonday(new Date()); loadWeekEvents(); });
 
 // ── Event modal ───────────────────────────────────────
 function openEventModal(ev = null) {
@@ -267,10 +292,17 @@ function openEventModal(ev = null) {
     const isEdit = !!ev;
     document.getElementById('event-modal-title').textContent = isEdit ? 'Редактировать занятие' : 'Новое занятие';
     document.getElementById('ev-status-wrap').style.display  = isEdit ? '' : 'none';
+    document.getElementById('ev-tpl-wrap').style.display     = isEdit ? 'none' : '';
 
     populateSelect(document.getElementById('ev-style'),   styles,   s => s.id, s => s.name);
     populateSelect(document.getElementById('ev-teacher'), teachers, t => t.id, t => t.name);
     populateSelect(document.getElementById('ev-sub'),     teachers, t => t.id, t => t.name, '<option value="">— нет замены —</option>');
+    populateSelect(document.getElementById('ev-template'),
+        templates.filter(t => t.is_active),
+        t => t.id,
+        t => `${DAY_NAMES[t.day_of_week]} ${t.time_start.slice(0,5)} — ${t.style_name}`,
+        '<option value="">— без шаблона —</option>'
+    );
 
     if (isEdit) {
         document.getElementById('ev-style').value   = ev.style_id;
@@ -288,6 +320,23 @@ function openEventModal(ev = null) {
     }
     document.getElementById('event-modal').classList.remove('hidden');
 }
+
+document.getElementById('ev-template').addEventListener('change', function() {
+    const tpl = templates.find(t => t.id === +this.value);
+    if (!tpl) return;
+    document.getElementById('ev-style').value   = tpl.style_id;
+    document.getElementById('ev-teacher').value = tpl.teacher_id;
+    document.getElementById('ev-time').value    = tpl.time_start.slice(0, 5);
+    document.getElementById('ev-dur').value     = tpl.duration_minutes;
+    document.getElementById('ev-max').value     = tpl.max_students;
+    // Подставить ближайшую дату по дню недели шаблона
+    const today = new Date();
+    const jsDay = (tpl.day_of_week + 1) % 7; // 0=Пн → JS 1, 6=Вс → JS 0
+    const diff  = (jsDay - today.getDay() + 7) % 7;
+    const next  = new Date(today);
+    next.setDate(today.getDate() + diff);
+    document.getElementById('ev-date').value = toISO(next);
+});
 
 document.getElementById('event-form').addEventListener('submit', async e => {
     e.preventDefault();
@@ -332,7 +381,7 @@ window.deleteEvent = async id => {
     catch (e) { showAlert(document.getElementById('events-alert'), e.message); }
 };
 
-document.getElementById('create-event-btn').addEventListener('click',    () => openEventModal());
+document.getElementById('apply-template-btn').addEventListener('click', applyTemplates);
 document.getElementById('event-modal-close').addEventListener('click',   () => document.getElementById('event-modal').classList.add('hidden'));
 document.getElementById('event-modal-cancel').addEventListener('click',  () => document.getElementById('event-modal').classList.add('hidden'));
 
@@ -346,32 +395,46 @@ async function loadTemplates() {
     }
 }
 
-function renderTemplates(templates) {
+function renderTemplates(tpls) {
     const el = document.getElementById('templates-list');
-    if (!templates.length) {
-        el.innerHTML = '<p style="color:var(--muted)">Шаблонов нет</p>';
-        return;
-    }
-    const sorted = [...templates].sort((a,b) => a.day_of_week - b.day_of_week || a.time_start.localeCompare(b.time_start));
-    el.innerHTML = sorted.map(t => `
-        <div class="schedule-admin-event${!t.is_active ? ' schedule-admin-event--cancelled' : ''}">
-            <div class="schedule-admin-event-info">
-                <div class="schedule-admin-event-title">${DAY_NAMES[t.day_of_week]} ${t.time_start.slice(0,5)} · ${t.style_name}</div>
-                <div class="schedule-admin-event-sub">
-                    ${t.teacher_name} · ${t.duration_minutes} мин · макс. ${t.max_students}
-                    ${!t.is_active ? ' · <span style="color:var(--muted)">неактивен</span>' : ''}
-                </div>
+    const byDay = Array.from({length: 7}, () => []);
+    tpls.forEach(t => byDay[t.day_of_week].push(t));
+    el.innerHTML = DAY_NAMES.map((day, i) => {
+        const sorted = byDay[i].sort((a, b) => a.time_start.localeCompare(b.time_start));
+        return `<div class="schedule-day">
+            <div class="schedule-day-header">
+                <span class="schedule-day-name">${DAY_ABBR[i]}</span>
+                <span class="schedule-day-date">${day}</span>
             </div>
-            <div class="schedule-admin-event-btns">
-                <button class="btn btn-secondary btn-sm" onclick="editTemplate(${t.id})">Ред.</button>
-                <button class="btn btn-danger btn-sm"    onclick="deleteTemplate(${t.id})">Удал.</button>
+            <div class="schedule-day-events">
+                ${sorted.map(t => `
+                    <div class="schedule-event-card${!t.is_active ? ' schedule-event-card--cancelled' : ''}">
+                        <div class="schedule-event-time">${t.time_start.slice(0,5)}</div>
+                        <div class="schedule-event-style">${t.style_name}</div>
+                        <div class="schedule-event-teacher">${t.teacher_name}</div>
+                        <div class="schedule-event-meta">
+                            <span>${t.duration_minutes} мин</span>
+                            <span>макс. ${t.max_students}</span>
+                            ${!t.is_active ? '<span class="badge badge-cancelled">Выкл</span>' : ''}
+                        </div>
+                        <div class="schedule-event-card-actions">
+                            <button class="btn btn-secondary btn-sm" style="flex:1;font-size:0.65rem;padding:2px 0" onclick="editTemplate(${t.id})">Ред.</button>
+                            <button class="btn btn-danger btn-sm"    style="flex:1;font-size:0.65rem;padding:2px 0" onclick="deleteTemplate(${t.id})">Удал.</button>
+                        </div>
+                    </div>
+                `).join('')}
+                <button class="btn btn-secondary schedule-event-btn" style="font-size:0.7rem;margin-top:4px" onclick="addTemplateForDay(${i})">+ Добавить</button>
             </div>
-        </div>
-    `).join('');
-    window._templates = templates;
+        </div>`;
+    }).join('');
+    window._templates = tpls;
 }
 
-function openTplModal(tpl = null) {
+window.addTemplateForDay = function(day) {
+    openTplModal(null, day);
+};
+
+function openTplModal(tpl = null, defaultDay = null) {
     editingTplId = tpl?.id ?? null;
     document.getElementById('tpl-modal-title').textContent = tpl ? 'Редактировать шаблон' : 'Новый шаблон';
     populateSelect(document.getElementById('tpl-style'),   styles,   s => s.id, s => s.name);
@@ -383,12 +446,13 @@ function openTplModal(tpl = null) {
         document.getElementById('tpl-time').value    = tpl.time_start.slice(0,5);
         document.getElementById('tpl-form').elements['duration_minutes'].value = tpl.duration_minutes;
         document.getElementById('tpl-form').elements['max_students'].value     = tpl.max_students;
-        document.getElementById('tpl-active').checked = tpl.is_active;
+        document.getElementById('tpl-active').value = String(tpl.is_active);
     } else {
         document.getElementById('tpl-form').reset();
         document.getElementById('tpl-form').elements['duration_minutes'].value = 60;
         document.getElementById('tpl-form').elements['max_students'].value     = 8;
-        document.getElementById('tpl-active').checked = true;
+        document.getElementById('tpl-active').value = 'true';
+        if (defaultDay !== null) document.getElementById('tpl-day').value = defaultDay;
     }
     document.getElementById('tpl-modal').classList.remove('hidden');
 }
@@ -403,7 +467,7 @@ document.getElementById('tpl-form').addEventListener('submit', async e => {
         time_start:       fd.get('time_start'),
         duration_minutes: +fd.get('duration_minutes'),
         max_students:     +fd.get('max_students'),
-        is_active:        document.getElementById('tpl-active').checked,
+        is_active:        document.getElementById('tpl-active').value === 'true',
     };
     try {
         if (editingTplId) await api.updateTemplate(editingTplId, data);
@@ -423,9 +487,67 @@ window.deleteTemplate = async id => {
     catch (e) { showAlert(document.getElementById('templates-alert'), e.message); }
 };
 
-document.getElementById('create-tpl-btn').addEventListener('click',   () => openTplModal());
 document.getElementById('tpl-modal-close').addEventListener('click',  () => document.getElementById('tpl-modal').classList.add('hidden'));
 document.getElementById('tpl-modal-cancel').addEventListener('click', () => document.getElementById('tpl-modal').classList.add('hidden'));
+
+// ── Clear week ───────────────────────────────────────
+document.getElementById('clear-week-btn').addEventListener('click', async () => {
+    if (!weekEvents.length) {
+        showAlert(document.getElementById('events-alert'), 'На этой неделе нет занятий');
+        return;
+    }
+    if (!await showConfirm(`Удалить все ${weekEvents.length} занятий этой недели? Записи студентов также будут удалены.`, 'Очистить неделю')) return;
+
+    const btn = document.getElementById('clear-week-btn');
+    btn.disabled = true;
+    for (const ev of weekEvents) {
+        try { await api.deleteEvent(ev.id); } catch {}
+    }
+    btn.disabled = false;
+    await loadWeekEvents();
+    showAlert(document.getElementById('events-alert'), 'Неделя очищена', 'success');
+});
+
+// ── Apply template ────────────────────────────────────
+async function applyTemplates() {
+    const active = templates.filter(t => t.is_active);
+    if (!active.length) {
+        showAlert(document.getElementById('events-alert'), 'Нет активных шаблонов. Сначала создайте шаблон.');
+        return;
+    }
+
+    const btn = document.getElementById('apply-template-btn');
+    btn.disabled = true;
+
+    let created = 0, skipped = 0;
+    for (const tpl of active) {
+        const eventDate = toISO(addDays(currentMonday, tpl.day_of_week));
+        const exists = weekEvents.some(ev =>
+            ev.template_id === tpl.id && ev.event_date === eventDate
+        );
+        if (exists) { skipped++; continue; }
+        try {
+            await api.createEvent({
+                style_id:         tpl.style_id,
+                teacher_id:       tpl.teacher_id,
+                event_date:       eventDate,
+                time_start:       tpl.time_start,
+                duration_minutes: tpl.duration_minutes,
+                max_students:     tpl.max_students,
+                template_id:      tpl.id,
+            });
+            created++;
+        } catch {}
+    }
+
+    btn.disabled = false;
+    await loadWeekEvents();
+
+    const msg = created
+        ? `Создано занятий: ${created}${skipped ? `, уже было: ${skipped}` : ''}`
+        : `Все занятия на эту неделю уже существуют`;
+    showAlert(document.getElementById('events-alert'), msg, created ? 'success' : 'error');
+}
 
 // ── Init ─────────────────────────────────────────────
 await loadShared();
